@@ -1,6 +1,8 @@
 package codesquad;
 
 import codesquad.http.HttpRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.net.ServerSocket;
@@ -20,6 +22,7 @@ public class Main {
             Socket clientSocket = serverSocket.accept();
 
             executorService.submit(() -> {
+                final Logger logger = LoggerFactory.getLogger(Thread.currentThread().getName());
                 try {
                     HttpRequest request = new HttpRequest(clientSocket.getInputStream());
 
@@ -29,16 +32,18 @@ public class Main {
                         BufferedReader reader = new BufferedReader(new FileReader(file));
                         try {
                             String line;
-                            output.write("HTTP/1.1 200 OK\r\n".getBytes());
-                            output.write("Content-Type: text/html\r\n\r\n".getBytes());
+                            logger.debug("Reading from file and writing to output");
+                            output.write("""
+                                    HTTP/1.1 200 OK\r
+                                    Content-Type: text/html\r
+                                    \r
+                                    """.getBytes());
                             while ((line = reader.readLine()) != null) {
-                                System.out.println("isConnected: " + clientSocket.isConnected() + " isClosed: " + clientSocket.isClosed());
                                 output.write(line.getBytes());
                             }
                             output.flush();
                         } catch (IOException e) {
-                            System.out.println("Error reading from file or writing to output: " + e);
-                            e.printStackTrace();
+                            logger.error("Error reading from file or writing to output: " + e);
                             throw new RuntimeException(e);
                         }
                     } else {
@@ -51,7 +56,7 @@ public class Main {
                         clientOutput.flush();
                     }
                 } catch (IOException e) {
-                    System.out.println("Error reading HTTP request: " + e);
+                    logger.error("Error reading HTTP request: " + e);
                     throw new RuntimeException(e);
                 } finally {
                     try {
