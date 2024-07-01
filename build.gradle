@@ -10,6 +10,11 @@ repositories {
 }
 
 dependencies {
+    // slf4j import
+    implementation 'org.slf4j:slf4j-api:1.7.30'
+    // logback import
+    implementation 'ch.qos.logback:logback-classic:1.4.14'
+
     testImplementation platform('org.junit:junit-bom:5.10.0')
     testImplementation 'org.junit.jupiter:junit-jupiter'
     // assertj import
