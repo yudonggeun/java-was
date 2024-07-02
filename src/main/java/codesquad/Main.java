@@ -1,5 +1,7 @@
 package codesquad;
 
+import codesquad.filter.AcceptHeaderFilter;
+import codesquad.filter.Filter;
 import codesquad.handler.HttpHandler;
 import codesquad.handler.StaticResourceHandler;
 import codesquad.http.ContentType;
@@ -14,16 +16,20 @@ import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.*;
 
 public class Main {
 
     private static final Logger log = LoggerFactory.getLogger(Main.class);
+    private static final Set<Filter> filters = new TreeSet<>();
     private static final Set<HttpHandler> httpHandlers = new LinkedHashSet<>();
 
     public static void main(String[] args) throws IOException {
         // handler 등록
         httpHandlers.add(new StaticResourceHandler());
+        // filter 등록
+        filters.add(new AcceptHeaderFilter());
 
         int serverPort = 8080;
         ServerSocket serverSocket = new ServerSocket(serverPort);
@@ -44,11 +50,11 @@ public class Main {
             executorService.submit(() -> {
 
                 final Logger logger = LoggerFactory.getLogger(Thread.currentThread().getName());
-                try {
+                try (OutputStream output = clientSocket.getOutputStream()) {
                     HttpRequest request = new HttpRequest(clientSocket.getInputStream());
                     HttpResponse response = null;
 
-                    logger.info("Request[method={}, host={}, path={}, headers={}, bod={}]",
+                    logger.info("Request[method={}, host={}, path={}, headers={}, body={}]",
                             request.method,
                             request.getHeader("Host"),
                             request.path,
@@ -56,7 +62,10 @@ public class Main {
                             request.getBody()
                     );
 
-                    OutputStream output = clientSocket.getOutputStream();
+                    // pre filter
+                    for (Filter filter : filters) {
+                        filter.preHandle(request);
+                    }
                     // handler 실행
                     for (HttpHandler httpHandler : httpHandlers) {
                         if (httpHandler.match(request)) {
@@ -66,6 +75,11 @@ public class Main {
                             response = HttpResponse.of(HttpStatus.NOT_FOUND);
                         }
                     }
+                    // post filter
+                    for (Filter filter : filters) {
+                        filter.postHandle(request, response);
+                    }
+                    logger.info("Response[status={}, headers={}, body={}]", response.getStatus(), response.getHeaderString(), response.getBody());
 
                     output.write(String.format("%s %d %s\r\n", response.getVersion(), response.getStatus().getCode(), response.getStatus().getStatus()).getBytes());
                     if (!response.getHeaderString().isEmpty()) {
@@ -76,59 +90,6 @@ public class Main {
                         output.write(response.getBody().getBytes());
                     }
                     output.flush();
-//                    File resource = new File("src/main/resources/static");
-//                    File file = new File(resource, request.path);
-//
-//                    if (file.exists()) {
-//                        // extract file extension
-//                        String fileName = file.getName();
-//                        int dotIndex = fileName.lastIndexOf('.');
-//                        String extension = fileName.substring(dotIndex + 1);
-//                        ContentType contentType = switch (dotIndex) {
-//                            case -1 -> ContentType.TEXT_PLAIN;
-//                            default -> ContentType.of(extension);
-//                        };
-//
-//                        HttpResponse resp = HttpResponse.of(HttpStatus.OK);
-//
-//                        try (
-//                                BufferedReader reader = new BufferedReader(new FileReader(file))
-//                        ) {
-//                            String line;
-//
-//                            if (!accept(request.getHeader("Accept"), contentType)) {
-//                                output.write("HTTP/1.1 406 Not Acceptable\r\n".getBytes());
-//                                logger.error("Not Acceptable");
-//                            } else {
-//                                logger.debug("Reading from file and writing to output");
-//                                output.write(("HTTP/1.1 200 OK\r\n".getBytes()));
-//
-//                                // header
-//                                output.write(("Content-Type: " + contentType.fullType + "\r\n").getBytes());
-//                                output.write("\r\n".getBytes());
-//                                // body
-//                                while ((line = reader.readLine()) != null) {
-//                                    output.write(line.getBytes());
-//                                }
-//                            }
-//                            output.write(String.format("%s %d %s\r\n", resp.getVersion(), resp.getStatus().getCode(), resp.getStatus().getStatus()).getBytes());
-//                            output.write(resp.getHeaderString().getBytes());
-//                            output.write("\r\n".getBytes());
-//                            output.write(resp.getBody().getBytes());
-//                            output.flush();
-//                        } catch (IOException e) {
-//                            logger.error("Error reading from file or writing to output: " + e);
-//                            throw new RuntimeException(e);
-//                        }
-//                    } else {
-//                        // HTTP 응답을 생성합니다.
-//                        OutputStream clientOutput = clientSocket.getOutputStream();
-//                        clientOutput.write("HTTP/1.1 200 OK\r\n".getBytes());
-//                        clientOutput.write("Content-Type: text/html\r\n".getBytes());
-//                        clientOutput.write("\r\n".getBytes());
-//                        clientOutput.write(("<h1>OK</h1>\r\n").getBytes());
-//                        clientOutput.flush();
-//                    }
                 } catch (IOException e) {
                     logger.error("Error reading HTTP request: " + e);
                     throw new RuntimeException(e);

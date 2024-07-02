@@ -40,6 +40,10 @@ public class HttpResponse {
         return sb.toString();
     }
 
+    public String getHeader(String key) {
+        return headers.get(key);
+    }
+
     public String getBody() {
         return body;
     }
@@ -50,5 +54,11 @@ public class HttpResponse {
 
     public void addHeader(String key, String value) {
         headers.put(key, value);
+    }
+
+    public void clear() {
+        headers.clear();
+        body = null;
+        status = null;
     }
 }
