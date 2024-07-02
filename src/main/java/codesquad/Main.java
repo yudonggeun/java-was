@@ -1,5 +1,6 @@
 package codesquad;
 
+import codesquad.http.ContentType;
 import codesquad.http.HttpRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,18 +44,29 @@ public class Main {
                             request.getBody()
                     );
 
-                    if (request.path.equals("/index.html")) {
-                        File file = new File("./src/main/resources/static/index.html");
+                    File resource = new File("src/main/resources/static");
+                    File file = new File(resource, request.path);
+
+                    if (file.exists()) {
+                        // extract file extension
+                        String fileName = file.getName();
+                        int dotIndex = fileName.lastIndexOf('.');
+                        String extension = fileName.substring(dotIndex + 1);
+                        ContentType contentType = switch (dotIndex) {
+                            case -1 -> ContentType.TEXT_PLAIN;
+                            default -> ContentType.of(extension);
+                        };
+
                         var output = clientSocket.getOutputStream();
                         BufferedReader reader = new BufferedReader(new FileReader(file));
                         try {
                             String line;
                             logger.debug("Reading from file and writing to output");
-                            output.write("""
-                                    HTTP/1.1 200 OK\r
-                                    Content-Type: text/html\r
-                                    \r
-                                    """.getBytes());
+                            output.write(("HTTP/1.1 200 OK\r\n".getBytes()));
+                            // header
+                            output.write(("Content-Type: " + contentType.getType() + "\r\n").getBytes());
+                            output.write("\r\n".getBytes());
+                            // body
                             while ((line = reader.readLine()) != null) {
                                 output.write(line.getBytes());
                             }
