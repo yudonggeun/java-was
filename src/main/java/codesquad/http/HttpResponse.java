@@ -63,6 +63,9 @@ public class HttpResponse {
     }
 
     public void update(HttpResponse response) {
+        if (response == null) {
+            throw new IllegalArgumentException("response is null");
+        }
         this.clear();
         this.status = response.getStatus();
         this.headers = response.headers;

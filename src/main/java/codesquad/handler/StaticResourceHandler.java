@@ -29,7 +29,7 @@ public class StaticResourceHandler implements HttpHandler {
             writeFileToBody(file, response);
             return response;
         }
-        return null;
+        return HttpResponse.of(HttpStatus.NOT_FOUND);
     }
 
     private ContentType getContentType(File file) {

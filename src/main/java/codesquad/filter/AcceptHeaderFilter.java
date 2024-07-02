@@ -10,6 +10,11 @@ public class AcceptHeaderFilter implements Filter {
     public void postHandle(HttpRequest request, HttpResponse response) {
         String acceptHeaderValue = request.getHeader("Accept");
         String responseMIME = response.getHeader("Content-Type");
+
+        // accept header가 없거나 responseMIME이 없으면 아무것도 하지 않습니다.
+        if (acceptHeaderValue == null || responseMIME == null) {
+            return;
+        }
         if (!accept(acceptHeaderValue, responseMIME)) {
             response.clear();
             response.setStatus(HttpStatus.NOT_ACCEPTABLE);
