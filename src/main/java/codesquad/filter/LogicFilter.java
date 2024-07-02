@@ -28,8 +28,10 @@ public class LogicFilter implements Filter {
     public void doFilter(HttpRequest request, HttpResponse response, FilterChain chain) {
         for (HttpHandler httpHandler : httpHandlers) {
             if (httpHandler.match(request)) {
-                response.update(httpHandler.doRun(request));
-                break;
+                var result = httpHandler.doRun(request);
+                if (result != null) {
+                    response.update(result);
+                }
             }
         }
         chain.doFilter(request, response);

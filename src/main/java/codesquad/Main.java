@@ -2,6 +2,7 @@ package codesquad;
 
 import codesquad.filter.*;
 import codesquad.handler.HttpHandler;
+import codesquad.handler.LoginHandler;
 import codesquad.handler.StaticResourceHandler;
 import codesquad.http.HttpRequest;
 import codesquad.http.HttpResponse;
@@ -26,6 +27,7 @@ public class Main {
         // init start
         Set<HttpHandler> httpHandler = new HashSet<>();
         httpHandler.add(new StaticResourceHandler());
+        httpHandler.add(new LoginHandler());
 
         filterConfig.addFilter(new AcceptHeaderFilter());
         filterConfig.addFilter(new HttpLoggingFilter());

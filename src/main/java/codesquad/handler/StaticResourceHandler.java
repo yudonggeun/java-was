@@ -22,7 +22,7 @@ public class StaticResourceHandler implements HttpHandler {
     @Override
     public HttpResponse doRun(HttpRequest request) {
         File file = new File(staticResource, request.path);
-        if (file.exists()) {
+        if (file.isFile() && file.exists()) {
             HttpResponse response = HttpResponse.of(HttpStatus.OK);
             ContentType contentType = getContentType(file);
             response.addHeader("Content-Type", contentType.fullType);
