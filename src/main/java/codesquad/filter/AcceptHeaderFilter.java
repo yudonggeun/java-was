@@ -3,12 +3,8 @@ package codesquad.filter;
 import codesquad.http.HttpRequest;
 import codesquad.http.HttpResponse;
 import codesquad.http.HttpStatus;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class AcceptHeaderFilter implements Filter {
-
-    private final Logger logger = LoggerFactory.getLogger(AcceptHeaderFilter.class);
 
     @Override
     public void postHandle(HttpRequest request, HttpResponse response) {
@@ -17,7 +13,6 @@ public class AcceptHeaderFilter implements Filter {
         if (!accept(acceptHeaderValue, responseMIME)) {
             response.clear();
             response.setStatus(HttpStatus.NOT_ACCEPTABLE);
-            logger.error("Not Acceptable");
         }
     }
 
