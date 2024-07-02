@@ -7,7 +7,7 @@ public class HttpResponse {
 
     private final String version = "HTTP/1.1";
     private HttpStatus status;
-    private final Map<String, String> headers = new HashMap<>();
+    private Map<String, String> headers = new HashMap<>();
     private String body;
 
     private HttpResponse(HttpStatus status) {
@@ -60,5 +60,12 @@ public class HttpResponse {
         headers.clear();
         body = null;
         status = null;
+    }
+
+    public void update(HttpResponse response) {
+        this.clear();
+        this.status = response.getStatus();
+        this.headers = response.headers;
+        this.body = response.getBody();
     }
 }
