@@ -7,16 +7,26 @@ import org.slf4j.LoggerFactory;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 
 public class Main {
 
-    public static void main(String[] args) throws IOException {
-        ServerSocket serverSocket = new ServerSocket(8080);
-        System.out.println("Listening for connection on port 8080 ....");
+    private static final Logger log = LoggerFactory.getLogger(Main.class);
 
-        ExecutorService executorService = Executors.newFixedThreadPool(10);
+    public static void main(String[] args) throws IOException {
+        int serverPort = 8080;
+        ServerSocket serverSocket = new ServerSocket(serverPort);
+        log.info("Listening for connection on port {} ....", serverPort);
+
+        int corePoolSize = 1;
+        int maximumPoolSize = 200;
+        long keepAliveTime = 5000;
+        TimeUnit unit = TimeUnit.MILLISECONDS;
+        BlockingQueue<Runnable> workQueue = new ArrayBlockingQueue<>(100);
+        ThreadFactory threadFactory = Executors.defaultThreadFactory();
+        RejectedExecutionHandler handler = new ThreadPoolExecutor.AbortPolicy();
+
+        ExecutorService executorService = new ThreadPoolExecutor(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue, threadFactory, handler);
 
         while (true) {
             Socket clientSocket = serverSocket.accept();
@@ -25,6 +35,13 @@ public class Main {
                 final Logger logger = LoggerFactory.getLogger(Thread.currentThread().getName());
                 try {
                     HttpRequest request = new HttpRequest(clientSocket.getInputStream());
+                    logger.info("Request[method={}, host={}, path={}, headers={}, bod={}]",
+                            request.method,
+                            request.getHeader("Host"),
+                            request.path,
+                            request.getHeaders(),
+                            request.getBody()
+                    );
 
                     if (request.path.equals("/index.html")) {
                         File file = new File("./src/main/resources/static/index.html");
@@ -62,7 +79,7 @@ public class Main {
                     try {
                         clientSocket.close();
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        logger.error("Error closing client socket: " + e);
                     }
                 }
             });
