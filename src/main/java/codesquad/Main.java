@@ -59,16 +59,24 @@ public class Main {
 
                         var output = clientSocket.getOutputStream();
                         BufferedReader reader = new BufferedReader(new FileReader(file));
+
                         try {
                             String line;
-                            logger.debug("Reading from file and writing to output");
-                            output.write(("HTTP/1.1 200 OK\r\n".getBytes()));
-                            // header
-                            output.write(("Content-Type: " + contentType.getType() + "\r\n").getBytes());
-                            output.write("\r\n".getBytes());
-                            // body
-                            while ((line = reader.readLine()) != null) {
-                                output.write(line.getBytes());
+
+                            if (!accept(request.getHeader("Accept"), contentType)) {
+                                output.write("HTTP/1.1 406 Not Acceptable\r\n".getBytes());
+                                logger.error("Not Acceptable");
+                            } else {
+                                logger.debug("Reading from file and writing to output");
+                                output.write(("HTTP/1.1 200 OK\r\n".getBytes()));
+
+                                // header
+                                output.write(("Content-Type: " + contentType.fullType + "\r\n").getBytes());
+                                output.write("\r\n".getBytes());
+                                // body
+                                while ((line = reader.readLine()) != null) {
+                                    output.write(line.getBytes());
+                                }
                             }
                             output.flush();
                         } catch (IOException e) {
@@ -96,5 +104,22 @@ public class Main {
                 }
             });
         }
+    }
+
+    public static boolean accept(String acceptHeaderValue, ContentType contentType) {
+        String[] mimeTypes = acceptHeaderValue.split(",");
+        for (String mimeType : mimeTypes) {
+            String[] types = mimeType.trim().split("/");
+            String type = types[0];
+            String subType = types[1];
+
+            boolean isMatchType = type.equals("*") || type.equals(contentType.type);
+            boolean isMatchSubType = subType.equals("*") || subType.equals(contentType.subType);
+
+            if (isMatchType && isMatchSubType) {
+                return true;
+            }
+        }
+        return false;
     }
 }
