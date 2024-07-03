@@ -68,13 +68,16 @@ public class Main {
                         output.write(response.getHeaderString().getBytes());
                         output.write("\r\n".getBytes());
                     }
-                    if (!response.getBody().isEmpty()) {
+                    if (response.getBody() == null || !response.getBody().isEmpty()) {
                         output.write(response.getBody().getBytes());
                     }
                     output.flush();
                 } catch (IOException e) {
                     logger.error("Error reading HTTP request: " + e);
-                    throw new RuntimeException(e);
+                    e.printStackTrace();
+                } catch (Exception e) {
+                    logger.error("Error processing HTTP request: " + e);
+                    e.printStackTrace();
                 } finally {
                     try {
                         clientSocket.close();

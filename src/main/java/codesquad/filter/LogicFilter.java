@@ -3,6 +3,7 @@ package codesquad.filter;
 import codesquad.handler.HttpHandler;
 import codesquad.http.HttpRequest;
 import codesquad.http.HttpResponse;
+import codesquad.http.HttpStatus;
 
 import java.util.Set;
 
@@ -33,6 +34,10 @@ public class LogicFilter implements Filter {
                     response.update(result);
                 }
             }
+        }
+
+        if (response == null) {
+            response = HttpResponse.of(HttpStatus.NOT_FOUND);
         }
         chain.doFilter(request, response);
     }
