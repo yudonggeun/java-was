@@ -7,6 +7,10 @@ import codesquad.http.HttpStatus;
 
 import java.util.Set;
 
+/**
+ * 반드시 마지막에 실행이 되어야하는 필터입니다.
+ * 실제 서비스의 로직을 실행하기 위한 진입점으로 사용하는 필터입니다.
+ */
 public class LogicFilter implements Filter {
 
     private final Set<HttpHandler> httpHandlers;
