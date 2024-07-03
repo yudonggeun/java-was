@@ -20,6 +20,8 @@ public class CharSetFilter implements Filter {
         if (contentType == null) {
             throw new IllegalArgumentException("Content-Type이 없습니다.");
         }
-        response.addHeader("Content-Type", contentType + "; charset=" + charSet);
+        if (contentType.startsWith("text")) {
+            response.addHeader("Content-Type", contentType + "; charset=" + charSet);
+        }
     }
 }
