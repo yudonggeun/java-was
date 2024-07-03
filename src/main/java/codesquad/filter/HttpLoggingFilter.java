@@ -11,12 +11,13 @@ public class HttpLoggingFilter implements Filter {
 
     @Override
     public void preHandle(HttpRequest request) {
-        logger.info("Request[method={}, host={}, path={}, headers={}, body={}]",
+        logger.info("Request[method={}, host={}, path={}, headers={}, body={}], params={}",
                 request.method,
                 request.getHeader("Host"),
                 request.path,
                 request.getHeaders(),
-                request.getBody()
+                request.getBody(),
+                request.getParams()
         );
     }
 

@@ -4,8 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * http request message를 파싱하여 HttpRequest 객체를 생성합니다.
@@ -19,6 +18,7 @@ public class HttpRequest {
     public final String version;
 
     private final Map<String, String> headers = new HashMap<>();
+    private final Map<String, List<String>> params = new HashMap<>();
     private String body;
 
     public HttpRequest(InputStream inputStream) {
@@ -28,7 +28,7 @@ public class HttpRequest {
 
             String[] tokens = line.split(" ");
             method = tokens[0];
-            path = tokens[1];
+            path = getAndGetPath(tokens[1]);
             version = tokens[2];
 
             while (!(line = br.readLine()).isEmpty()) {
@@ -47,12 +47,36 @@ public class HttpRequest {
         }
     }
 
+    /**
+     * path 에 포함된 Query Parameter를 추출하여 Map에 저장하고, path에서 Query Parameter를 제외한 path를 반환합니다.
+     *
+     * @param path Query Parameter가 포함된 path
+     * @return Query Parameter가 제거된 path
+     */
+    private String getAndGetPath(String path) {
+        int index = path.indexOf("?");
+        String result = path.substring(0, index);
+        StringTokenizer st = new StringTokenizer(path.substring(index + 1), "&");
+        while (st.hasMoreTokens()) {
+            String[] tokens = st.nextToken().split("=");
+            if (!params.containsKey(tokens[0])) {
+                params.put(tokens[0], new ArrayList<>());
+            }
+            params.get(tokens[0]).add(tokens[1]);
+        }
+        return result;
+    }
+
     private boolean existBody() {
         return headers.containsKey("Content-Length");
     }
 
     /*----------- getter --------------*/
 
+    public String getParam(String key) {
+        if (!params.containsKey(key)) return null;
+        return params.get(key).get(0);
+    }
     /**
      * http request message의 header 값을 반환합니다.
      *
@@ -74,5 +98,9 @@ public class HttpRequest {
 
     public String getHeaders() {
         return headers.toString();
+    }
+
+    public String getParams() {
+        return params.toString();
     }
 }
