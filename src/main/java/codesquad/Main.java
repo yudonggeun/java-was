@@ -21,7 +21,7 @@ import java.util.concurrent.*;
 public class Main {
 
     private static final Logger log = LoggerFactory.getLogger(Main.class);
-    private static final FilterConfig filterConfig = new FilterConfig();
+    private static FilterConfig filterConfig;
 
     public static void main(String[] args) throws IOException {
         // init start
@@ -29,9 +29,12 @@ public class Main {
         httpHandler.add(new StaticResourceHandler());
         httpHandler.add(new LoginHandler());
 
-        filterConfig.addFilter(new AcceptHeaderFilter());
-        filterConfig.addFilter(new HttpLoggingFilter());
-        filterConfig.addFilter(new LogicFilter(httpHandler));
+        filterConfig = new FilterConfig(
+                new HttpLoggingFilter(),
+                new CharSetFilter("UTF-8"),
+                new AcceptHeaderFilter(),
+                new LogicFilter(httpHandler)
+        );
 
         int serverPort = 8080;
         ServerSocket serverSocket = new ServerSocket(serverPort);
@@ -68,7 +71,7 @@ public class Main {
                         output.write(response.getHeaderString().getBytes());
                         output.write("\r\n".getBytes());
                     }
-                    if (response.getBody() == null || !response.getBody().isEmpty()) {
+                    if (response.getBody() != null && !response.getBody().isEmpty()) {
                         output.write(response.getBody().getBytes());
                     }
                     output.flush();

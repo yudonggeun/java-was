@@ -1,7 +1,6 @@
 package codesquad.filter;
 
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.Arrays;
 
 /**
  * <h2>
@@ -20,13 +19,14 @@ import java.util.TreeSet;
  */
 public class FilterConfig {
 
-    private static final Set<Filter> filters = new TreeSet<>();
+    private final Filter[] filters;
 
-    public Filter[] getFilters() {
-        return filters.toArray(new Filter[0]);
+    public FilterConfig(Filter... filters) {
+        this.filters = filters;
+        Arrays.sort(this.filters);
     }
 
-    public void addFilter(Filter filter) {
-        filters.add(filter);
+    public Filter[] getFilters() {
+        return filters;
     }
 }

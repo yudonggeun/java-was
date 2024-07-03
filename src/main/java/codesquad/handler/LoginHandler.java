@@ -2,6 +2,7 @@ package codesquad.handler;
 
 import codesquad.application.domain.User;
 import codesquad.application.repository.MyRepository;
+import codesquad.http.ContentType;
 import codesquad.http.HttpRequest;
 import codesquad.http.HttpResponse;
 import codesquad.http.HttpStatus;
@@ -45,6 +46,7 @@ public class LoginHandler implements HttpHandler {
         repository.save(userId, user);
 
         HttpResponse response = HttpResponse.of(HttpStatus.OK);
+        response.setContentType(ContentType.TEXT_HTML);
         response.setBody("""
                 <p>
                 회원가입 완료!

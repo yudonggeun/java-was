@@ -23,14 +23,17 @@ public class HttpResponse {
         return version;
     }
 
+    public String getBody() {
+        return body;
+    }
+
     public HttpStatus getStatus() {
         return status;
     }
 
-    public void setStatus(HttpStatus status) {
-        this.status = status;
+    public String getHeader(String key) {
+        return headers.get(key);
     }
-    /*----------getter end-----------*/
 
     public String getHeaderString() {
         StringBuilder sb = new StringBuilder();
@@ -40,16 +43,17 @@ public class HttpResponse {
         return sb.toString();
     }
 
-    public String getHeader(String key) {
-        return headers.get(key);
-    }
-
-    public String getBody() {
-        return body;
+    /*----------getter end-----------*/
+    public void setStatus(HttpStatus status) {
+        this.status = status;
     }
 
     public void setBody(String body) {
         this.body = body;
+    }
+
+    public void setContentType(ContentType type) {
+        headers.put("Content-Type", type.fullType);
     }
 
     public void addHeader(String key, String value) {
