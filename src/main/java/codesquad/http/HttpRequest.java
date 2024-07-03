@@ -55,6 +55,7 @@ public class HttpRequest {
      */
     private String getAndGetPath(String path) {
         int index = path.indexOf("?");
+        if (index == -1) return path;
         String result = path.substring(0, index);
         StringTokenizer st = new StringTokenizer(path.substring(index + 1), "&");
         while (st.hasMoreTokens()) {
