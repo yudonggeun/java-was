@@ -7,34 +7,32 @@ import codesquad.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 
 public class StaticResourceHandler implements HttpHandler {
 
-    private static final File staticResource = new File("src/main/resources/static");
     private final Logger logger = LoggerFactory.getLogger(StaticResourceHandler.class);
 
     @Override
     public boolean match(HttpRequest request) {
-        return true;
+        URL resource = this.getClass().getResource("/static" + request.path);
+        return resource != null;
     }
 
     @Override
     public HttpResponse doRun(HttpRequest request) {
-        File file = new File(staticResource, request.path);
-        if (file.isFile() && file.exists()) {
-            HttpResponse response = HttpResponse.of(HttpStatus.OK);
-            ContentType contentType = getContentType(file);
-            response.addHeader("Content-Type", contentType.fullType);
-            writeFileToBody(file, response);
-            return response;
-        }
-        return null;
+        HttpResponse response = HttpResponse.of(HttpStatus.OK);
+        ContentType contentType = getContentType(request.path);
+        response.addHeader("Content-Type", contentType.fullType);
+        writeFileToBody(request.path, response);
+        return response;
     }
 
-    private ContentType getContentType(File file) {
+    private ContentType getContentType(String fileName) {
         // extract file extension
-        String fileName = file.getName();
         int dotIndex = fileName.lastIndexOf('.');
         String extension = fileName.substring(dotIndex + 1);
 
@@ -45,18 +43,16 @@ public class StaticResourceHandler implements HttpHandler {
         };
     }
 
-    private void writeFileToBody(File file, HttpResponse response) {
+    private void writeFileToBody(String path, HttpResponse response) {
 
-        try (InputStream in = new FileInputStream(file)) {
-            byte[] fileContentBytes = new byte[(int) file.length()];
-            in.read(fileContentBytes);
+        try (InputStream in = this.getClass().getResourceAsStream("/static" + path)) {
+            byte[] fileContentBytes = in.readAllBytes();
             response.setBody(fileContentBytes);
-
         } catch (FileNotFoundException e) {
-            logger.error("File not found: {}", file.getAbsolutePath());
+            logger.error("File not found: {}", path);
             throw new RuntimeException(e);
         } catch (IOException e) {
-            logger.error("Error reading from binary file: {}", file.getAbsolutePath());
+            logger.error("Error reading from binary file: {}", path);
             throw new RuntimeException(e);
         }
     }
