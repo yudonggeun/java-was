@@ -8,7 +8,7 @@ public class HttpResponse {
     private final String version = "HTTP/1.1";
     private HttpStatus status;
     private Map<String, String> headers = new HashMap<>();
-    private String body;
+    private byte[] body;
 
     private HttpResponse(HttpStatus status) {
         this.status = status;
@@ -24,7 +24,7 @@ public class HttpResponse {
     }
 
     public String getBody() {
-        return body;
+        return new String(body);
     }
 
     public HttpStatus getStatus() {
@@ -34,6 +34,7 @@ public class HttpResponse {
     public String getHeader(String key) {
         return headers.get(key);
     }
+    /*----------getter end-----------*/
 
     public String getHeaderString() {
         StringBuilder sb = new StringBuilder();
@@ -49,6 +50,18 @@ public class HttpResponse {
     }
 
     public void setBody(String body) {
+        int size = body.length();
+        headers.put("Content-Length", String.valueOf(size));
+        this.body = body.getBytes();
+    }
+
+    public byte[] getBytesBody() {
+        return this.body;
+    }
+
+    public void setByteBody(byte[] body) {
+        int size = body.length;
+        headers.put("Content-Length", String.valueOf(size));
         this.body = body;
     }
 
@@ -73,6 +86,6 @@ public class HttpResponse {
         this.clear();
         this.status = response.getStatus();
         this.headers = response.headers;
-        this.body = response.getBody();
+        this.body = response.getBytesBody();
     }
 }
