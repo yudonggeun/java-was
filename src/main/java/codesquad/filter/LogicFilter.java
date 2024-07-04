@@ -5,6 +5,7 @@ import codesquad.http.HttpRequest;
 import codesquad.http.HttpResponse;
 import codesquad.http.HttpStatus;
 
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -31,17 +32,16 @@ public class LogicFilter implements Filter {
 
     @Override
     public void doFilter(HttpRequest request, HttpResponse response, FilterChain chain) {
-        for (HttpHandler httpHandler : httpHandlers) {
-            if (httpHandler.match(request)) {
-                var result = httpHandler.doRun(request);
-                if (result != null) {
-                    response.update(result);
-                }
-            }
-        }
 
-        if (response == null) {
-            response = HttpResponse.of(HttpStatus.NOT_FOUND);
+        Optional<HttpResponse> result = httpHandlers.stream()
+                .filter(httpHandler -> httpHandler.match(request))
+                .findFirst()
+                .map(httpHandler -> httpHandler.doRun(request));
+
+        if (result.isPresent()) {
+            response.update(result.get());
+        } else {
+            response.update(HttpResponse.of(HttpStatus.NOT_FOUND));
         }
         chain.doFilter(request, response);
     }
