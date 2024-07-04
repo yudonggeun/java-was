@@ -67,7 +67,7 @@ public class Main {
                         output.write("\r\n".getBytes());
                     }
                     if (!response.getBody().isEmpty()) {
-                        output.write(response.getBody().getBytes());
+                        output.write(response.getBytesBody());
                     }
                     output.flush();
                 } catch (IOException e) {
