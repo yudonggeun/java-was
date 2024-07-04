@@ -51,7 +51,7 @@ public class LoginHandler implements HttpHandler {
                 <p>
                 회원가입 완료!
                 </p>
-                """);
+                """.getBytes());
         logger.debug("User created: {}", user);
         return response;
     }

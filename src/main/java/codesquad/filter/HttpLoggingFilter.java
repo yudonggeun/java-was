@@ -26,7 +26,7 @@ public class HttpLoggingFilter implements Filter {
 
     @Override
     public void postHandle(HttpRequest request, HttpResponse response) {
-        logger.info("Response[status={}, headers={}, body={}]", response.getStatus(), response.getHeaderString(), response.getBody());
+        logger.info("Response[status={}, headers={}]", response.getStatus(), response.getHeaderString());
     }
 
     @Override

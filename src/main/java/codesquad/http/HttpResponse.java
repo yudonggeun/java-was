@@ -23,10 +23,6 @@ public class HttpResponse {
         return version;
     }
 
-    public String getBody() {
-        return new String(body);
-    }
-
     public HttpStatus getStatus() {
         return status;
     }
@@ -34,7 +30,6 @@ public class HttpResponse {
     public String getHeader(String key) {
         return headers.get(key);
     }
-    /*----------getter end-----------*/
 
     public String getHeaderString() {
         StringBuilder sb = new StringBuilder();
@@ -44,22 +39,16 @@ public class HttpResponse {
         return sb.toString();
     }
 
+    public byte[] getBody() {
+        return this.body;
+    }
+
     /*----------getter end-----------*/
     public void setStatus(HttpStatus status) {
         this.status = status;
     }
 
-    public void setBody(String body) {
-        int size = body.length();
-        headers.put("Content-Length", String.valueOf(size));
-        this.body = body.getBytes();
-    }
-
-    public byte[] getBytesBody() {
-        return this.body;
-    }
-
-    public void setByteBody(byte[] body) {
+    public void setBody(byte[] body) {
         int size = body.length;
         headers.put("Content-Length", String.valueOf(size));
         this.body = body;
@@ -86,6 +75,6 @@ public class HttpResponse {
         this.clear();
         this.status = response.getStatus();
         this.headers = response.headers;
-        this.body = response.getBytesBody();
+        this.body = response.getBody();
     }
 }

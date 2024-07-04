@@ -80,8 +80,8 @@ public class EndPoint {
                     output.write(response.getHeaderString().getBytes());
                     output.write("\r\n".getBytes());
                 }
-                if (response.getBody() != null && !response.getBody().isEmpty()) {
-                    output.write(response.getBody().getBytes());
+                if (response.getBody() != null) {
+                    output.write(response.getBody());
                 }
                 output.flush();
             } catch (IOException e) {

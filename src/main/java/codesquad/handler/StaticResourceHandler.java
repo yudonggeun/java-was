@@ -46,51 +46,18 @@ public class StaticResourceHandler implements HttpHandler {
     }
 
     private void writeFileToBody(File file, HttpResponse response) {
-        // Determine if the file is binary
-        boolean isBinary = isBinaryFile(file);
 
-        if (isBinary) {
-            try (InputStream in = new FileInputStream(file)) {
-                byte[] fileContentBytes = new byte[(int) file.length()];
-                in.read(fileContentBytes);
+        try (InputStream in = new FileInputStream(file)) {
+            byte[] fileContentBytes = new byte[(int) file.length()];
+            in.read(fileContentBytes);
+            response.setBody(fileContentBytes);
 
-                // Convert bytes to string using ISO_8859_1
-                response.setByteBody(fileContentBytes);
-
-                logger.debug("Reading from binary file and writing to output");
-            } catch (FileNotFoundException e) {
-                logger.error("File not found: {}", file.getAbsolutePath());
-                throw new RuntimeException(e);
-            } catch (IOException e) {
-                logger.error("Error reading from binary file: {}", file.getAbsolutePath());
-                throw new RuntimeException(e);
-            }
-        } else {
-            // Handle text files as before
-            try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-                StringBuilder sb = new StringBuilder();
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    sb.append(line);
-                }
-                response.setBody(sb.toString());
-
-                logger.debug("Reading from text file and writing to output");
-            } catch (FileNotFoundException e) {
-                logger.error("File not found: {}", file.getAbsolutePath());
-                throw new RuntimeException(e);
-            } catch (IOException e) {
-                logger.error("Error reading from text file: {}", file.getAbsolutePath());
-                throw new RuntimeException(e);
-            }
+        } catch (FileNotFoundException e) {
+            logger.error("File not found: {}", file.getAbsolutePath());
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            logger.error("Error reading from binary file: {}", file.getAbsolutePath());
+            throw new RuntimeException(e);
         }
-    }
-
-    private boolean isBinaryFile(File file) {
-        String fileName = file.getName();
-        String extension = fileName.substring(fileName.lastIndexOf('.') + 1).toLowerCase();
-        // List of binary file extensions
-        ContentType contentType = ContentType.of(extension);
-        return contentType.type.equals("image");
     }
 }
