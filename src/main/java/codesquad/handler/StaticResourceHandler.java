@@ -19,7 +19,7 @@ public class StaticResourceHandler implements HttpHandler {
     @Override
     public boolean match(HttpRequest request) {
         URL resource = this.getClass().getResource("/static" + request.path);
-        return resource != null;
+        return resource != null && resource.getPath().contains(".");
     }
 
     @Override
