@@ -16,7 +16,7 @@ public class LoginHandler implements HttpHandler {
     private final MyRepository repository = MyRepository.source;
     private final Logger logger = LoggerFactory.getLogger(LoginHandler.class);
     private final Map<String, Function<HttpRequest, HttpResponse>> handlers = Map.of(
-            "/registration", this::login,
+            "/registration", this::registrationPage,
             "/user/create", this::createUser,
             "/login", this::loginPage
     );
@@ -33,7 +33,7 @@ public class LoginHandler implements HttpHandler {
     }
 
     // get /registration
-    public HttpResponse login(HttpRequest request) {
+    public HttpResponse registrationPage(HttpRequest request) {
         HttpResponse response = HttpResponse.of(HttpStatus.MOVED_PERMANENTLY);
         response.addHeader("Location", "/registration/index.html");
         return response;
