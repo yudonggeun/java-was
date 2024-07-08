@@ -19,6 +19,8 @@ public class HttpRequest {
 
     private final Map<String, String> headers = new HashMap<>();
     private final Map<String, List<String>> params = new HashMap<>();
+    private final Map<String, Object> bodyParams = new HashMap<>();
+
     private String body;
 
     public HttpRequest(InputStream inputStream) {
@@ -41,9 +43,34 @@ public class HttpRequest {
                 char[] body = new char[contentLength];
                 br.read(body, 0, contentLength);
                 this.body = new String(body);
+                if (headers.get("Content-Type").equals("application/x-www-form-urlencoded"))
+                    initFormData(this.body);
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * body에 포함된 데이터를 파싱하여 Map에 저장합니다.
+     * 하나의 속성이 존재하는 값은 String to String으로 저장하고,
+     * 여러개의 속성이 존재하는 값은 String to List<String>으로 저장합니다.
+     *
+     * @param body body에 포함된 데이터
+     */
+    private void initFormData(String body) {
+        StringTokenizer st = new StringTokenizer(body, "&");
+        while (st.hasMoreTokens()) {
+            String[] tokens = st.nextToken().split("=");
+            if (bodyParams.containsKey(tokens[0])) {
+                String type = (String) bodyParams.get(tokens[0]);
+                bodyParams.put(tokens[0], new ArrayList<>());
+                ArrayList<String> values = (ArrayList<String>) bodyParams.get(tokens[0]);
+                values.add(type);
+                values.add(tokens[1]);
+            } else {
+                bodyParams.put(tokens[0], tokens[1]);
+            }
         }
     }
 
@@ -78,6 +105,7 @@ public class HttpRequest {
         if (!params.containsKey(key)) return null;
         return params.get(key).get(0);
     }
+
     /**
      * http request message의 header 값을 반환합니다.
      *
