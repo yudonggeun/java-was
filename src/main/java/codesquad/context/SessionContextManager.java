@@ -18,4 +18,8 @@ public class SessionContextManager {
         return instance.sessionContexts.get(sid);
     }
 
+    public static void clearContext(String sid) {
+        instance.sessionContexts.remove(sid);
+    }
+
 }
