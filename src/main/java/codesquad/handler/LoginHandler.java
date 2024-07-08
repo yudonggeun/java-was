@@ -9,14 +9,24 @@ import codesquad.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Map;
+import java.util.function.Function;
+
 public class LoginHandler implements HttpHandler {
 
     private final MyRepository repository = MyRepository.source;
     private final Logger logger = LoggerFactory.getLogger(LoginHandler.class);
+    private final Map<String, Function<HttpRequest, HttpResponse>> handlers = Map.of(
+            "/registration", this::login,
+            "/user/create", this::createUser
+    );
 
     @Override
     public boolean match(HttpRequest request) {
-        return true;
+        for (String mapping : handlers.keySet()) {
+            return mapping.equals(request.path);
+        }
+        return false;
     }
 
     @Override
