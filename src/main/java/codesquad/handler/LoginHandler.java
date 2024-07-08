@@ -2,6 +2,7 @@ package codesquad.handler;
 
 import codesquad.application.domain.User;
 import codesquad.application.repository.MyRepository;
+import codesquad.context.SessionContextManager;
 import codesquad.http.HttpRequest;
 import codesquad.http.HttpResponse;
 import codesquad.http.HttpStatus;
@@ -94,8 +95,12 @@ public class LoginHandler implements HttpHandler {
 
         User user = repository.findUser(userId);
         if (user != null && user.getPassword().equals(password)) {
+
+            String sid = SessionContextManager.createContext();
+
             response = HttpResponse.of(HttpStatus.SEE_OTHER);
             response.addHeader("Location", "/index.html");
+            response.addHeader("Set-Cookie", "SID=" + sid);
         } else {
             response = HttpResponse.of(HttpStatus.SEE_OTHER);
             response.addHeader("Location", "/login/fail.html");
