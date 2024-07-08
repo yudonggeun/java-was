@@ -17,7 +17,8 @@ public class LoginHandler implements HttpHandler {
     private final Logger logger = LoggerFactory.getLogger(LoginHandler.class);
     private final Map<String, Function<HttpRequest, HttpResponse>> handlers = Map.of(
             "/registration", this::login,
-            "/user/create", this::createUser
+            "/user/create", this::createUser,
+            "/login", this::loginPage
     );
 
     @Override
@@ -68,5 +69,11 @@ public class LoginHandler implements HttpHandler {
         Object bodyParam = request.getBodyParam(attr);
         if (bodyParam instanceof String) return (String) bodyParam;
         return null;
+    }
+
+    private HttpResponse loginPage(HttpRequest request) {
+        HttpResponse response = HttpResponse.of(HttpStatus.MOVED_PERMANENTLY);
+        response.addHeader("Location", "/login/index.html");
+        return response;
     }
 }
