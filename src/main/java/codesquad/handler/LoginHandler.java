@@ -2,6 +2,7 @@ package codesquad.handler;
 
 import codesquad.application.domain.User;
 import codesquad.application.repository.MyRepository;
+import codesquad.context.SessionContext;
 import codesquad.context.SessionContextManager;
 import codesquad.http.HttpRequest;
 import codesquad.http.HttpResponse;
@@ -97,6 +98,8 @@ public class LoginHandler implements HttpHandler {
         if (user != null && user.getPassword().equals(password)) {
 
             String sid = SessionContextManager.createContext();
+            SessionContext context = SessionContextManager.getContext(sid);
+            context.setAttributes("user", user);
 
             response = HttpResponse.of(HttpStatus.SEE_OTHER);
             response.addHeader("Location", "/index.html");
