@@ -132,4 +132,8 @@ public class HttpRequest {
     public String getParams() {
         return params.toString();
     }
+
+    public Object getBodyParam(String attr) {
+        return bodyParams.get(attr);
+    }
 }

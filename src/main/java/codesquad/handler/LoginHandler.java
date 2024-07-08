@@ -2,7 +2,6 @@ package codesquad.handler;
 
 import codesquad.application.domain.User;
 import codesquad.application.repository.MyRepository;
-import codesquad.http.ContentType;
 import codesquad.http.HttpRequest;
 import codesquad.http.HttpResponse;
 import codesquad.http.HttpStatus;
@@ -23,20 +22,13 @@ public class LoginHandler implements HttpHandler {
 
     @Override
     public boolean match(HttpRequest request) {
-        for (String mapping : handlers.keySet()) {
-            return mapping.equals(request.path);
-        }
-        return false;
+        return handlers.containsKey(request.path);
     }
 
     @Override
     public HttpResponse doRun(HttpRequest request) {
-        if (request.path.equals("/registration")) {
-            return login(request);
-        } else if (request.path.equals("/user/create")) {
-            return createUser(request);
-        }
-        return null;
+        if (!handlers.containsKey(request.path)) return null;
+        return handlers.get(request.path).apply(request);
     }
 
     // get /registration
@@ -47,22 +39,34 @@ public class LoginHandler implements HttpHandler {
     }
 
     public HttpResponse createUser(HttpRequest request) {
-        String userId = request.getParam("userId");
-        String password = request.getParam("password");
-        String nickname = request.getParam("nickname");
+
+        HttpResponse response;
+        if (!(
+                request.method.equals("POST") &&
+                request.getHeader("Content-Type").contains("application/x-www-form-urlencoded")
+        )) {
+            response = HttpResponse.of(HttpStatus.BAD_REQUEST);
+            return response;
+        }
+
+        String userId = readSingleBodyParam(request, "userId");
+        String password = readSingleBodyParam(request, "password");
+        String nickname = readSingleBodyParam(request, "nickname");
 
         // save user
         User user = new User(userId, password, nickname);
         repository.save(userId, user);
 
-        HttpResponse response = HttpResponse.of(HttpStatus.OK);
-        response.setContentType(ContentType.TEXT_HTML);
-        response.setBody("""
-                <p>
-                회원가입 완료!
-                </p>
-                """.getBytes());
+        response = HttpResponse.of(HttpStatus.SEE_OTHER);
+        response.addHeader("Location", "/index.html");
+
         logger.debug("User created: {}", user);
         return response;
+    }
+
+    private String readSingleBodyParam(HttpRequest request, String attr) {
+        Object bodyParam = request.getBodyParam(attr);
+        if (bodyParam instanceof String) return (String) bodyParam;
+        return null;
     }
 }
