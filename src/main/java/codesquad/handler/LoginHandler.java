@@ -18,7 +18,8 @@ public class LoginHandler implements HttpHandler {
     private final Map<String, Function<HttpRequest, HttpResponse>> handlers = Map.of(
             "/registration", this::registrationPage,
             "/user/create", this::createUser,
-            "/login", this::loginPage
+            "/login", this::loginPage,
+            "/signin", this::login
     );
 
     @Override
@@ -74,6 +75,32 @@ public class LoginHandler implements HttpHandler {
     private HttpResponse loginPage(HttpRequest request) {
         HttpResponse response = HttpResponse.of(HttpStatus.MOVED_PERMANENTLY);
         response.addHeader("Location", "/login/index.html");
+        return response;
+    }
+
+    private HttpResponse login(HttpRequest request) {
+
+        HttpResponse response;
+        if (!(
+                request.method.equals("POST") &&
+                request.getHeader("Content-Type").contains("application/x-www-form-urlencoded")
+        )) {
+            response = HttpResponse.of(HttpStatus.BAD_REQUEST);
+            return response;
+        }
+
+        String userId = readSingleBodyParam(request, "userId");
+        String password = readSingleBodyParam(request, "password");
+
+        User user = repository.findUser(userId);
+        if (user != null && user.getPassword().equals(password)) {
+            response = HttpResponse.of(HttpStatus.SEE_OTHER);
+            response.addHeader("Location", "/index.html");
+        } else {
+            response = HttpResponse.of(HttpStatus.SEE_OTHER);
+            response.addHeader("Location", "/login/fail.html");
+        }
+
         return response;
     }
 }

@@ -11,4 +11,16 @@ public class User {
         this.password = password;
         this.nickname = nickname;
     }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public String getNickname() {
+        return nickname;
+    }
 }
