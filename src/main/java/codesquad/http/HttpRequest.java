@@ -62,6 +62,7 @@ public class HttpRequest {
         StringTokenizer st = new StringTokenizer(body, "&");
         while (st.hasMoreTokens()) {
             String[] tokens = st.nextToken().split("=");
+            if (tokens.length <= 1) continue;
             if (bodyParams.containsKey(tokens[0])) {
                 String type = (String) bodyParams.get(tokens[0]);
                 bodyParams.put(tokens[0], new ArrayList<>());

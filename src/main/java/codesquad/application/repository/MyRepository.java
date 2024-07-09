@@ -16,6 +16,7 @@ public class MyRepository {
     }
 
     public User findUser(String key) {
+        if (key == null) return null;
         return (User) map.get(key);
     }
 
