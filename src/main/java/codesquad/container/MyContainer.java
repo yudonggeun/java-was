@@ -4,6 +4,7 @@ import codesquad.filter.*;
 import codesquad.handler.HttpHandler;
 import codesquad.handler.LoginHandler;
 import codesquad.handler.StaticResourceHandler;
+import codesquad.handler.TemplateResourceHandler;
 import codesquad.http.HttpRequest;
 import codesquad.http.HttpResponse;
 import codesquad.http.HttpStatus;
@@ -14,6 +15,7 @@ public class MyContainer {
 
     private final Set<HttpHandler> httpHandler = Set.of(
             new StaticResourceHandler(),
+            new TemplateResourceHandler(),
             new LoginHandler()
     );
 
