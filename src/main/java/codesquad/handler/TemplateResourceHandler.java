@@ -26,6 +26,7 @@ public class TemplateResourceHandler implements HttpHandler {
         HttpResponse response = HttpResponse.of(HttpStatus.OK);
         ContentType contentType = getContentType(request.path);
         response.addHeader("Content-Type", contentType.fullType);
+        convertToHtml(request.path, response);
         writeFileToBody(request.path, response);
         return response;
     }
@@ -56,37 +57,42 @@ public class TemplateResourceHandler implements HttpHandler {
         }
     }
 
-    public HtmlRoot convertToHtml(String template) {
-        HtmlRoot root = new HtmlRoot();
-        // split tags
-        Deque<String> tags = new LinkedList<>();
-        StringBuilder tag = new StringBuilder();
-        char[] templates = template.toCharArray();
-        for (int i = 0; i < template.length(); i++) {
-            if (templates[i] == '<') {
-                if (!tag.isEmpty() && !tag.toString().trim().isEmpty()) tags.add(tag.toString());
-                tag = new StringBuilder();
-                tag.append(templates[i]);
-            } else if (templates[i] == '>') {
-                tag.append(templates[i]);
-                if (!tag.isEmpty() && !tag.toString().trim().isEmpty()) tags.add(tag.toString());
-                tag = new StringBuilder();
-            } else {
-                tag.append(templates[i]);
+    public void convertToHtml(String path, HttpResponse response) {
+        try (InputStream in = this.getClass().getResourceAsStream("/templates" + path)) {
+            String template = new String(in.readAllBytes());
+            HtmlRoot root = new HtmlRoot();
+            // split tags
+            Deque<String> tags = new LinkedList<>();
+            StringBuilder tag = new StringBuilder();
+            char[] templates = template.toCharArray();
+            for (int i = 0; i < template.length(); i++) {
+                if (templates[i] == '<') {
+                    if (!tag.isEmpty() && !tag.toString().trim().isEmpty()) tags.add(tag.toString());
+                    tag = new StringBuilder();
+                    tag.append(templates[i]);
+                } else if (templates[i] == '>') {
+                    tag.append(templates[i]);
+                    if (!tag.isEmpty() && !tag.toString().trim().isEmpty()) tags.add(tag.toString());
+                    tag = new StringBuilder();
+                } else {
+                    tag.append(templates[i]);
+                }
             }
-        }
 
-        System.out.println(tags);
-        while (!tags.isEmpty()) {
-            Deque<String> nextTags = new LinkedList<>();
-            HtmlElement.Builder elementBuilder = extractElement(tags);
-            System.out.println("loop : " + elementBuilder.build().toHtml());
-            root.addElement(elementBuilder.build());
+            while (!tags.isEmpty()) {
+                Deque<String> nextTags = new LinkedList<>();
+                HtmlElement.Builder elementBuilder = extractElement(tags);
+                System.out.println("loop : " + elementBuilder.build().toHtml());
+                root.addElement(elementBuilder.build());
 
-            tags = nextTags;
+                tags = nextTags;
+            }
+
+            response.setBody(root.toHtml().getBytes());
+        } catch (IOException e) {
+            logger.error("Error reading from binary file: {}", path);
+            throw new RuntimeException(e);
         }
-        System.out.println(root.toHtml());
-        return root;
     }
 
     private HtmlElement.Builder extractElement(Deque<String> tags) {
