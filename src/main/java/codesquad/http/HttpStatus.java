@@ -15,6 +15,8 @@ public enum HttpStatus {
     TEMPORARY_REDIRECT(307, "Temporary Redirect"),
     // 4xx Client Error
     BAD_REQUEST(400, "Bad Request"),
+    UNAUTHORIZED(401, "Unauthorized"),
+    FORBIDDEN(403, "Forbidden"),
     NOT_FOUND(404, "Not Found"),
     NOT_ALLOWED(405, "Method Not Allowed"),
     NOT_ACCEPTABLE(406, "Not Acceptable"),
