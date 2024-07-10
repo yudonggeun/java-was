@@ -38,6 +38,16 @@ public class TagHtmlElement implements HtmlElement {
                 }
             }
         }
+        // woowa-value
+        if (attributes.containsKey("woowa-value")) {
+            String key = attributes.get("woowa-value");
+            if (key != null) {
+                String value = model.getAttribute(key).toString();
+                if (value != null) {
+                    children = List.of(HtmlElement.create(value).build());
+                }
+            }
+        }
         for (HtmlElement child : children) {
             child.applyModel(model);
         }
