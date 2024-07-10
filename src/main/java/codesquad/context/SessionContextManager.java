@@ -20,11 +20,17 @@ public class SessionContextManager {
         return instance.sessionContexts.get(sid);
     }
 
-    public static void clearContext(String sid) {
+    public static void clearContext(HttpRequest request) {
+        String sid = getSessionId(request);
         instance.sessionContexts.remove(sid);
     }
 
     public static SessionContext getSession(HttpRequest request) {
+        String sid = getSessionId(request);
+        return getContext(sid);
+    }
+
+    private static String getSessionId(HttpRequest request) {
         String sid = null;
         String cookies = request.getHeader("Cookie");
         if (cookies == null) return null;
@@ -38,8 +44,7 @@ public class SessionContextManager {
                 break;
             }
         }
-
-        return getContext(sid);
+        return sid;
     }
 
 }

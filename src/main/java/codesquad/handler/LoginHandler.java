@@ -23,9 +23,21 @@ public class LoginHandler implements HttpHandler {
             "/registration", this::registrationPage,
             "/user/create", this::createUser,
             "/login", this::loginPage,
+            "/logout", this::logout,
             "/signin", this::login,
             "/user/list", this::getUserList
     );
+
+    private HttpResponse logout(HttpRequest request) {
+        SessionContext session = SessionContextManager.getSession(request);
+        if (session != null) {
+            SessionContextManager.clearContext(request);
+        }
+        HttpResponse response = HttpResponse.of(HttpStatus.SEE_OTHER);
+        response.addHeader("Location", "/index.html");
+        response.addHeader("Set-Cookie", "SID=; Max-Age=0");
+        return response;
+    }
 
     @Override
     public boolean match(HttpRequest request) {
