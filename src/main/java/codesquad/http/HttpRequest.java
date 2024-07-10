@@ -13,7 +13,7 @@ import java.util.*;
  */
 public class HttpRequest {
 
-    public final String method;
+    public final Method method;
     public final String path;
     public final String version;
 
@@ -29,7 +29,7 @@ public class HttpRequest {
             String line = br.readLine();
 
             String[] tokens = line.split(" ");
-            method = tokens[0];
+            method = Method.of(tokens[0]);
             path = getAndGetPath(tokens[1]);
             version = tokens[2];
 

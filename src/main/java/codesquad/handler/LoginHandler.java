@@ -4,10 +4,7 @@ import codesquad.application.domain.User;
 import codesquad.application.repository.MyRepository;
 import codesquad.context.SessionContext;
 import codesquad.context.SessionContextManager;
-import codesquad.http.ContentType;
-import codesquad.http.HttpRequest;
-import codesquad.http.HttpResponse;
-import codesquad.http.HttpStatus;
+import codesquad.http.*;
 import codesquad.template.HtmlElement;
 import codesquad.template.HtmlManager;
 import codesquad.template.HtmlRoot;
@@ -20,6 +17,8 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+
+import static codesquad.http.Method.POST;
 
 public class LoginHandler implements HttpHandler {
 
@@ -68,7 +67,7 @@ public class LoginHandler implements HttpHandler {
 
         HttpResponse response;
         if (!(
-                request.method.equals("POST") &&
+                request.method.equals(POST) &&
                 request.getHeader("Content-Type").contains("application/x-www-form-urlencoded")
         )) {
             response = HttpResponse.of(HttpStatus.BAD_REQUEST);
@@ -106,7 +105,7 @@ public class LoginHandler implements HttpHandler {
 
         HttpResponse response;
         if (!(
-                request.method.equals("POST") &&
+                request.method.equals(Method.POST) &&
                 request.getHeader("Content-Type").contains("application/x-www-form-urlencoded")
         )) {
             response = HttpResponse.of(HttpStatus.BAD_REQUEST);
