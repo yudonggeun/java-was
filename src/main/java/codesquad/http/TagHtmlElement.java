@@ -42,9 +42,9 @@ public class TagHtmlElement implements HtmlElement {
         if (attributes.containsKey("woowa-value")) {
             String key = attributes.get("woowa-value");
             if (key != null) {
-                String value = model.getAttribute(key).toString();
+                Object value = model.getAttribute(key);
                 if (value != null) {
-                    children = List.of(HtmlElement.create(value).build());
+                    children = List.of(HtmlElement.create(value.toString()).build());
                 }
             }
         }

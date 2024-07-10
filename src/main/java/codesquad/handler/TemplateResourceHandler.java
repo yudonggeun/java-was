@@ -92,7 +92,6 @@ public class TemplateResourceHandler implements HttpHandler {
             model.setSession(session);
             root.applyModel(model);
 
-            System.out.println(root.toHtml());
             response.setBody(root.toHtml().getBytes());
         } catch (IOException e) {
             logger.error("Error reading from binary file: {}", path);

@@ -2,6 +2,7 @@ package codesquad.template;
 
 import codesquad.context.SessionContext;
 
+import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -30,15 +31,31 @@ public class Model {
         return getAttribute(key, data);
     }
 
-    private Object getAttribute(String key, Map<String, Object> map) {
-        if (key.contains(".")) {
-            int i = key.indexOf(".");
-            Object nextMap = map.get(key.substring(0, i));
-            if (nextMap instanceof Map)
-                return getAttribute(key.substring(i + 1), (Map<String, Object>) nextMap);
-            else
+    private Object getAttribute(String attr, Map<String, Object> map) {
+        if (attr.contains(".")) {
+            int i = attr.indexOf(".");
+            String key = attr.substring(0, i);
+            String value = attr.substring(i + 1);
+
+            Object source = map.get(key);
+            if (source instanceof Map) {
+                return getAttribute(value, (Map<String, Object>) source);
+            } else if (source != null) {
+                Field[] fields = source.getClass().getDeclaredFields();
+                for (Field field : fields) {
+                    if (field.getName().equals(value)) {
+                        try {
+                            field.setAccessible(true);
+                            return field.get(source);
+                        } catch (IllegalAccessException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            } else {
                 return null;
+            }
         }
-        return map.get(key);
+        return map.get(attr);
     }
 }
