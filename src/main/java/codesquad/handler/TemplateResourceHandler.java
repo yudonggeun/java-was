@@ -2,7 +2,12 @@ package codesquad.handler;
 
 import codesquad.context.SessionContext;
 import codesquad.context.SessionContextManager;
-import codesquad.http.*;
+import codesquad.http.ContentType;
+import codesquad.http.HttpRequest;
+import codesquad.http.HttpResponse;
+import codesquad.http.HttpStatus;
+import codesquad.template.HtmlElement;
+import codesquad.template.HtmlRoot;
 import codesquad.template.Model;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

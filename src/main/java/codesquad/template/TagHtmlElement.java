@@ -1,7 +1,4 @@
-package codesquad.http;
-
-import codesquad.template.Model;
-import codesquad.template.Operator;
+package codesquad.template;
 
 import java.util.*;
 

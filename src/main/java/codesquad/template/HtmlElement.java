@@ -1,6 +1,4 @@
-package codesquad.http;
-
-import codesquad.template.Model;
+package codesquad.template;
 
 import java.util.List;
 
