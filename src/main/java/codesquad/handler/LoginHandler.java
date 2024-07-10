@@ -4,12 +4,14 @@ import codesquad.application.domain.User;
 import codesquad.application.repository.MyRepository;
 import codesquad.context.SessionContext;
 import codesquad.context.SessionContextManager;
+import codesquad.http.ContentType;
 import codesquad.http.HttpRequest;
 import codesquad.http.HttpResponse;
 import codesquad.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -21,7 +23,8 @@ public class LoginHandler implements HttpHandler {
             "/registration", this::registrationPage,
             "/user/create", this::createUser,
             "/login", this::loginPage,
-            "/signin", this::login
+            "/signin", this::login,
+            "/user/list", this::getUserList
     );
 
     @Override
@@ -111,4 +114,33 @@ public class LoginHandler implements HttpHandler {
 
         return response;
     }
+
+    private HttpResponse getUserList(HttpRequest request) {
+        HttpResponse response;
+
+        SessionContext session = SessionContextManager.getSession(request);
+        if (session == null) {
+            response = HttpResponse.of(HttpStatus.FOUND);
+            response.addHeader("Location", "/login/index.html");
+            return response;
+        }
+
+        List<User> users = repository.findAllUser();
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("<html><body><h1>User List</h1><ul>");
+        for (User user : users) {
+            sb.append("<li>")
+                    .append(user.getUserId()).append(": ").append(user.getNickname())
+                    .append("</li>");
+        }
+        sb.append("</ul></body></html>");
+
+        response = HttpResponse.of(HttpStatus.OK);
+        response.setContentType(ContentType.TEXT_HTML);
+        response.setBody(sb.toString().getBytes());
+
+        return response;
+    }
+
 }

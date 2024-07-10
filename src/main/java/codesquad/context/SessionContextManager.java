@@ -1,5 +1,7 @@
 package codesquad.context;
 
+import codesquad.http.HttpRequest;
+
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -20,6 +22,24 @@ public class SessionContextManager {
 
     public static void clearContext(String sid) {
         instance.sessionContexts.remove(sid);
+    }
+
+    public static SessionContext getSession(HttpRequest request) {
+        String sid = null;
+        String cookies = request.getHeader("Cookie");
+        if (cookies == null) return null;
+        cookies = cookies.replace(";", "");
+        for (String cookie : cookies.split(" ")) {
+            String[] entry = cookie.split("=");
+            String key = entry[0];
+            String value = entry[1];
+            if (key.equals("SID")) {
+                sid = value;
+                break;
+            }
+        }
+
+        return getContext(sid);
     }
 
 }

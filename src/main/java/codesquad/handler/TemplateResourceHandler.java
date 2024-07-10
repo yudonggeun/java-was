@@ -86,7 +86,7 @@ public class TemplateResourceHandler implements HttpHandler {
                 root.addElement(elementBuilder.build());
             }
 
-            SessionContext session = getSession(request);
+            SessionContext session = SessionContextManager.getSession(request);
 
             Model model = new Model();
             model.setSession(session);
@@ -97,25 +97,6 @@ public class TemplateResourceHandler implements HttpHandler {
             logger.error("Error reading from binary file: {}", path);
             throw new RuntimeException(e);
         }
-    }
-
-    private SessionContext getSession(HttpRequest request) {
-        String sid = null;
-        String cookies = request.getHeader("Cookie");
-        if (cookies == null) return null;
-        cookies = cookies.replace(";", "");
-        for (String cookie : cookies.split(" ")) {
-            String[] entry = cookie.split("=");
-            String key = entry[0];
-            String value = entry[1];
-            if (key.equals("SID")) {
-                sid = value;
-                break;
-            }
-        }
-
-        SessionContext session = SessionContextManager.getContext(sid);
-        return session;
     }
 
     private HtmlElement.Builder extractElement(Deque<String> tags) {
