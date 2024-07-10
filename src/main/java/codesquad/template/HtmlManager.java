@@ -25,16 +25,16 @@ public class HtmlManager {
         }
 
         while (!tags.isEmpty()) {
-            HtmlElement.Builder elementBuilder = extractElement(tags);
+            HtmlElementBuilder elementBuilder = extractElement(tags);
             root.addElement(elementBuilder.build());
         }
 
         return root;
     }
 
-    private HtmlElement.Builder extractElement(Deque<String> tags) {
+    private HtmlElementBuilder extractElement(Deque<String> tags) {
         String firstTags = tags.pollFirst();
-        HtmlElement.Builder elementBuilder = HtmlElement.create(firstTags);
+        HtmlElementBuilder elementBuilder = HtmlElement.create(firstTags);
 
         if (!elementBuilder.isOpen()) {
             return elementBuilder;

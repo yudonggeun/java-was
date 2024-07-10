@@ -85,16 +85,16 @@ public class TagHtmlElement implements HtmlElement {
         this.children.add(element);
     }
 
-    public static class ElementBuilder implements HtmlElement.Builder {
+    public static class ElementBuilder implements HtmlElementBuilder {
         private String tag;
         private final Map<String, String> attributes = new HashMap<>();
-        private final List<HtmlElement.Builder> children = new ArrayList<>();
+        private final List<HtmlElementBuilder> children = new ArrayList<>();
         private boolean isOpen;
 
         public ElementBuilder() {
         }
 
-        public HtmlElement.Builder setLine(String line) {
+        public HtmlElementBuilder setLine(String line) {
             if (line.startsWith("<") && line.endsWith("/>")) {
                 line = line.substring(1, line.length() - 2);
                 isOpen = false;
@@ -120,7 +120,7 @@ public class TagHtmlElement implements HtmlElement {
         }
 
         @Override
-        public HtmlElement.Builder addChildren(Builder... children) {
+        public HtmlElementBuilder addChildren(HtmlElementBuilder... children) {
             Collections.addAll(this.children, children);
             return this;
         }
@@ -130,12 +130,12 @@ public class TagHtmlElement implements HtmlElement {
             TagHtmlElement element = new TagHtmlElement();
             element.tag = tag;
             element.attributes = attributes;
-            element.children = this.children.stream().map(HtmlElement.Builder::build).toList();
+            element.children = this.children.stream().map(HtmlElementBuilder::build).toList();
             return element;
         }
 
         @Override
-        public HtmlElement.Builder setClose() {
+        public HtmlElementBuilder setClose() {
             this.isOpen = false;
             return this;
         }

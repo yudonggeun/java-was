@@ -4,7 +4,7 @@ import java.util.List;
 
 public interface HtmlElement {
 
-    static HtmlElement.Builder create(String line) {
+    static HtmlElementBuilder create(String line) {
         if (line.startsWith("<") && line.endsWith("/>")) {
             return new TagHtmlElement.ElementBuilder()
                     .setLine(line);
@@ -26,19 +26,4 @@ public interface HtmlElement {
     String getAttribute(String s);
 
     void addChild(HtmlElement element);
-
-    interface Builder {
-
-        HtmlElement.Builder setLine(String line);
-
-        boolean isOpen();
-
-        String getTag();
-
-        HtmlElement.Builder addChildren(Builder... builder);
-
-        HtmlElement.Builder setClose();
-
-        HtmlElement build();
-    }
 }

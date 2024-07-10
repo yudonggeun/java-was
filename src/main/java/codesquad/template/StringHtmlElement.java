@@ -36,12 +36,12 @@ public class StringHtmlElement implements HtmlElement {
         throw new UnsupportedOperationException();
     }
 
-    public static class ElementBuilder implements HtmlElement.Builder {
+    public static class ElementBuilder implements HtmlElementBuilder {
 
         private String value;
 
         @Override
-        public HtmlElement.Builder setLine(String line) {
+        public HtmlElementBuilder setLine(String line) {
             this.value = line;
             return this;
         }
@@ -62,13 +62,13 @@ public class StringHtmlElement implements HtmlElement {
         }
 
         @Override
-        public Builder addChildren(Builder... builder) {
+        public HtmlElementBuilder addChildren(HtmlElementBuilder... builder) {
             //todo
             return null;
         }
 
         @Override
-        public Builder setClose() {
+        public HtmlElementBuilder setClose() {
             return null;
         }
     }
