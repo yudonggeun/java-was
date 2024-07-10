@@ -20,13 +20,24 @@ import java.util.Arrays;
 public class FilterConfig {
 
     private final Filter[] filters;
+    private final Filter handlerFilter;
 
-    public FilterConfig(Filter... filters) {
+    public FilterConfig(Filter handlerFilter, Filter... filters) {
         this.filters = filters;
+        this.handlerFilter = handlerFilter;
         Arrays.sort(this.filters);
     }
 
     public Filter[] getFilters() {
         return filters;
+    }
+
+    /**
+     * 가장 마지막에 실행되어야 하는 필터를 반환합니다. 해당 필터를 통해서 handler를 호출합니다.
+     *
+     * @return
+     */
+    public Filter getHandlerFilter() {
+        return handlerFilter;
     }
 }

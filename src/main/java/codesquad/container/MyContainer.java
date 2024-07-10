@@ -20,10 +20,10 @@ public class MyContainer {
     );
 
     private final FilterConfig filterConfig = new FilterConfig(
+            new LogicFilter(httpHandler),
             new HttpLoggingFilter(),
             new CharSetFilter("UTF-8"),
-            new AcceptHeaderFilter(),
-            new LogicFilter(httpHandler)
+            new AcceptHeaderFilter()
     );
 
     public HttpResponse doRun(HttpRequest request) {
