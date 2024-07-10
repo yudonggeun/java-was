@@ -79,6 +79,12 @@ public class TagHtmlElement implements HtmlElement {
         return attributes.get(s);
     }
 
+    @Override
+    public void addChild(HtmlElement element) {
+        this.children = new LinkedList<>(this.children);
+        this.children.add(element);
+    }
+
     public static class ElementBuilder implements HtmlElement.Builder {
         private String tag;
         private final Map<String, String> attributes = new HashMap<>();

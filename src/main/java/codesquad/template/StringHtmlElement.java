@@ -30,6 +30,12 @@ public class StringHtmlElement implements HtmlElement {
         return "";
     }
 
+    @Override
+    public void addChild(HtmlElement element) {
+        // todo HtmlElement 인터페이스 리텍토링
+        throw new UnsupportedOperationException();
+    }
+
     public static class ElementBuilder implements HtmlElement.Builder {
 
         private String value;

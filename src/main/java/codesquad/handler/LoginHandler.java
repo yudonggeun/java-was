@@ -8,9 +8,15 @@ import codesquad.http.ContentType;
 import codesquad.http.HttpRequest;
 import codesquad.http.HttpResponse;
 import codesquad.http.HttpStatus;
+import codesquad.template.HtmlElement;
+import codesquad.template.HtmlManager;
+import codesquad.template.HtmlRoot;
+import codesquad.template.Model;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -19,6 +25,7 @@ public class LoginHandler implements HttpHandler {
 
     private final MyRepository repository = MyRepository.source;
     private final Logger logger = LoggerFactory.getLogger(LoginHandler.class);
+    private final HtmlManager htmlManager = new HtmlManager();
     private final Map<String, Function<HttpRequest, HttpResponse>> handlers = Map.of(
             "/registration", this::registrationPage,
             "/user/create", this::createUser,
@@ -128,31 +135,48 @@ public class LoginHandler implements HttpHandler {
     }
 
     private HttpResponse getUserList(HttpRequest request) {
-        HttpResponse response;
+        try (InputStream input = this.getClass().getResourceAsStream("/templates/user/list.html")) {
 
-        SessionContext session = SessionContextManager.getSession(request);
-        if (session == null) {
-            response = HttpResponse.of(HttpStatus.FOUND);
-            response.addHeader("Location", "/login/index.html");
+            HttpResponse response;
+
+            String html = new String(input.readAllBytes());
+            HtmlRoot root = htmlManager.create(html);
+
+            SessionContext session = SessionContextManager.getSession(request);
+            if (session == null) {
+                response = HttpResponse.of(HttpStatus.FOUND);
+                response.addHeader("Location", "/login/index.html");
+                return response;
+            }
+
+            Model model = new Model();
+            model.setSession(session);
+
+            List<User> users = repository.findAllUser();
+
+            HtmlElement userTableElement = root.findById("user-table");
+
+            for (User user : users) {
+                userTableElement.addChild(HtmlElement.create("<tr class=\"myclass\">")
+                        .addChildren(
+                                HtmlElement.create("<td>").addChildren(HtmlElement.create(user.getUserId())),
+                                HtmlElement.create("<td>").addChildren(HtmlElement.create(user.getNickname()))
+                        )
+                        .setClose()
+                        .build()
+                );
+            }
+
+            root.applyModel(model);
+
+            response = HttpResponse.of(HttpStatus.OK);
+            response.setContentType(ContentType.TEXT_HTML);
+            response.setBody(root.toHtml().getBytes());
+
             return response;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
-
-        List<User> users = repository.findAllUser();
-
-        StringBuilder sb = new StringBuilder();
-        sb.append("<html><body><h1>User List</h1><ul>");
-        for (User user : users) {
-            sb.append("<li>")
-                    .append(user.getUserId()).append(": ").append(user.getNickname())
-                    .append("</li>");
-        }
-        sb.append("</ul></body></html>");
-
-        response = HttpResponse.of(HttpStatus.OK);
-        response.setContentType(ContentType.TEXT_HTML);
-        response.setBody(sb.toString().getBytes());
-
-        return response;
     }
 
 }

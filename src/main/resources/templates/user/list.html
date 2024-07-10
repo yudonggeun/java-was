@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <link href="/reset.css" rel="stylesheet"/>
+    <link href="/global.css" rel="stylesheet"/>
+    <link href="/main.css" rel="stylesheet"/>
+    <title>사용자 목록</title>
+</head>
+<body>
+<div>
+    <header class="header">
+        <a href="/"><img src="/img/signiture.svg"/></a>
+        <ul class="header__menu" woowa-if="session.user == null">
+            <li class="header__menu__item">
+                <a class="btn btn_contained btn_size_s" href="/login">
+                    로그인
+                </a>
+            </li>
+            <li class="header__menu__item">
+                <a class="btn btn_ghost btn_size_s" href="/registration">
+                    회원 가입
+                </a>
+            </li>
+        </ul>
+        <ul class="header__menu" woowa-if="session.user != null">
+            <li class="header__menu__item">
+                <a class="btn btn_contained btn_size_s" href="/article">
+                    글쓰기
+                </a>
+            </li>
+            <li class="header__menu__item">
+                <a class="btn btn_ghost btn_size_s" href="/logout" id="logout-btn">
+                    로그아웃
+                </a>
+            </li>
+        </ul>
+    </header>
+    <table>
+        <thead>
+        <tr>
+            <th>아이디</th>
+            <th>닉네임</th>
+        </tr>
+        </thead>
+        <tbody id="user-table">
+        </tbody>
+    </table>
+</div>
+</body>
+</html>

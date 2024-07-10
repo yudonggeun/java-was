@@ -24,4 +24,24 @@ public class HtmlRoot {
             element.applyModel(model);
         }
     }
+
+    public HtmlElement findById(String id) {
+        for (HtmlElement htmlElement : elementList) {
+            HtmlElement result = findById(id, htmlElement);
+            if (result != null) return result;
+        }
+        return null;
+    }
+
+    private HtmlElement findById(String id, HtmlElement element) {
+        String elementId = element.getAttribute("id");
+        if (elementId != null && elementId.equals(id)) {
+            return element;
+        }
+        for (HtmlElement child : element.getChildren()) {
+            HtmlElement result = findById(id, child);
+            if (result != null) return result;
+        }
+        return null;
+    }
 }

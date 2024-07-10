@@ -25,6 +25,8 @@ public interface HtmlElement {
 
     String getAttribute(String s);
 
+    void addChild(HtmlElement element);
+
     interface Builder {
 
         HtmlElement.Builder setLine(String line);

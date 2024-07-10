@@ -17,6 +17,7 @@ public class SessionContextManager {
     }
 
     public static SessionContext getContext(String sid) {
+        if (sid == null) return null;
         return instance.sessionContexts.get(sid);
     }
 
