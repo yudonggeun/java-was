@@ -1,6 +1,9 @@
 package codesquad.handler;
 
+import codesquad.context.SessionContext;
+import codesquad.context.SessionContextManager;
 import codesquad.http.*;
+import codesquad.template.Model;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,8 +29,7 @@ public class TemplateResourceHandler implements HttpHandler {
         HttpResponse response = HttpResponse.of(HttpStatus.OK);
         ContentType contentType = getContentType(request.path);
         response.addHeader("Content-Type", contentType.fullType);
-        convertToHtml(request.path, response);
-        writeFileToBody(request.path, response);
+        convertToHtml(request.path, request, response);
         return response;
     }
 
@@ -57,7 +59,7 @@ public class TemplateResourceHandler implements HttpHandler {
         }
     }
 
-    public void convertToHtml(String path, HttpResponse response) {
+    public void convertToHtml(String path, HttpRequest request, HttpResponse response) {
         try (InputStream in = this.getClass().getResourceAsStream("/templates" + path)) {
             String template = new String(in.readAllBytes());
             HtmlRoot root = new HtmlRoot();
@@ -80,19 +82,41 @@ public class TemplateResourceHandler implements HttpHandler {
             }
 
             while (!tags.isEmpty()) {
-                Deque<String> nextTags = new LinkedList<>();
                 HtmlElement.Builder elementBuilder = extractElement(tags);
-                System.out.println("loop : " + elementBuilder.build().toHtml());
                 root.addElement(elementBuilder.build());
-
-                tags = nextTags;
             }
 
+            SessionContext session = getSession(request);
+
+            Model model = new Model();
+            model.setSession(session);
+            root.applyModel(model);
+
+            System.out.println(root.toHtml());
             response.setBody(root.toHtml().getBytes());
         } catch (IOException e) {
             logger.error("Error reading from binary file: {}", path);
             throw new RuntimeException(e);
         }
+    }
+
+    private SessionContext getSession(HttpRequest request) {
+        String sid = null;
+        String cookies = request.getHeader("Cookie");
+        if (cookies == null) return null;
+        cookies = cookies.replace(";", "");
+        for (String cookie : cookies.split(" ")) {
+            String[] entry = cookie.split("=");
+            String key = entry[0];
+            String value = entry[1];
+            if (key.equals("SID")) {
+                sid = value;
+                break;
+            }
+        }
+
+        SessionContext session = SessionContextManager.getContext(sid);
+        return session;
     }
 
     private HtmlElement.Builder extractElement(Deque<String> tags) {

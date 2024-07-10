@@ -1,5 +1,9 @@
 package codesquad.http;
 
+import codesquad.template.Model;
+
+import java.util.List;
+
 public interface HtmlElement {
 
     static HtmlElement.Builder create(String line) {
@@ -15,7 +19,13 @@ public interface HtmlElement {
         }
     }
 
+    void applyModel(Model model);
+
     String toHtml();
+
+    List<HtmlElement> getChildren();
+
+    String getAttribute(String s);
 
     interface Builder {
 

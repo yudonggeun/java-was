@@ -1,5 +1,8 @@
 package codesquad.http;
 
+import codesquad.template.Model;
+import codesquad.template.Operator;
+
 import java.util.*;
 
 public class TagHtmlElement implements HtmlElement {
@@ -8,11 +11,42 @@ public class TagHtmlElement implements HtmlElement {
     private Map<String, String> attributes;
     private List<HtmlElement> children;
 
-    /* create */
     private TagHtmlElement() {
     }
 
+    @Override
+    public void applyModel(Model model) {
+        // woowa-if
+        if (attributes.containsKey("woowa-if")) {
+            String command = attributes.get("woowa-if");
+            if (command != null) {
+                // command는 현재 a op b 형태의 연산만 지원한다.
+                String[] args = command.split(" ");
+                if (args.length == 3) {
+                    Object a = model.getAttribute(args[0]);
+                    Object b = model.getAttribute(args[2]);
+                    Operator op = Operator.of(args[1]);
+
+                    boolean isMatch = op.match(a, b);
+                    System.out.println(command + ": view=" + isMatch);
+                    if (!isMatch) {
+                        System.out.println(tag + " is removed " + this.getAttribute("woowa-if"));
+                        this.tag = null;
+                        this.children = List.of();
+                        return;
+                    }
+                }
+            }
+        }
+        for (HtmlElement child : children) {
+            child.applyModel(model);
+        }
+    }
+
+    @Override
     public String toHtml() {
+        // render
+        if (tag == null) return "";
         StringBuilder sb = new StringBuilder();
         sb.append("<").append(tag);
         for (Map.Entry<String, String> entry : attributes.entrySet()) {
@@ -28,7 +62,15 @@ public class TagHtmlElement implements HtmlElement {
         sb.append("</").append(tag).append(">");
         return sb.toString();
     }
-    /* create end*/
+
+    public List<HtmlElement> getChildren() {
+        return children;
+    }
+
+    @Override
+    public String getAttribute(String s) {
+        return attributes.get(s);
+    }
 
     public static class ElementBuilder implements HtmlElement.Builder {
         private String tag;
@@ -55,7 +97,7 @@ public class TagHtmlElement implements HtmlElement {
                 int index = attrs[i].indexOf('=');
                 if (index != -1) {
                     String key = attrs[i].substring(0, index);
-                    String value = attrs[i].substring(index);
+                    String value = attrs[i].substring(index + 1).replace("\"", "");
                     this.attributes.put(key, value);
                 } else {
                     this.attributes.put(attrs[i], null);

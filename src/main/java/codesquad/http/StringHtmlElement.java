@@ -1,5 +1,9 @@
 package codesquad.http;
 
+import codesquad.template.Model;
+
+import java.util.List;
+
 public class StringHtmlElement implements HtmlElement {
 
     private final String value;
@@ -9,8 +13,23 @@ public class StringHtmlElement implements HtmlElement {
     }
 
     @Override
+    public void applyModel(Model model) {
+        // do nothing
+    }
+
+    @Override
     public String toHtml() {
         return value;
+    }
+
+    @Override
+    public List<HtmlElement> getChildren() {
+        return List.of();
+    }
+
+    @Override
+    public String getAttribute(String s) {
+        return "";
     }
 
     public static class ElementBuilder implements HtmlElement.Builder {

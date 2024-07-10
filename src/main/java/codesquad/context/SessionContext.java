@@ -14,4 +14,8 @@ public class SessionContext {
     public void setAttributes(String key, Object value) {
         attributes.put(key, value);
     }
+
+    public Map<String, Object> getAttributes() {
+        return attributes;
+    }
 }
