@@ -3,11 +3,7 @@ package codesquad.handler;
 import codesquad.http.HttpRequest;
 import codesquad.http.HttpResponse;
 
-public interface HttpHandler extends Runnable {
-
-    @Override
-    default void run() {
-    }
+public interface HttpHandler {
 
     /**
      * handler가 처리할 수 있는 요청을 처리합니다.
