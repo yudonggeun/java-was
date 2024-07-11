@@ -6,6 +6,7 @@ import codesquad.context.SessionContext;
 import codesquad.context.SessionContextManager;
 import codesquad.handler.HttpHandler;
 import codesquad.handler.StaticResourceHandler;
+import codesquad.handler.TemplateResourceHandler;
 import codesquad.handler.URLMatcher;
 import codesquad.http.*;
 import codesquad.template.HtmlElement;
@@ -32,13 +33,14 @@ import static codesquad.http.Method.POST;
  */
 public class RouterConfig {
 
-    private final Logger logger = LoggerFactory.getLogger(StaticResourceHandler.class);
+    private final Logger logger = LoggerFactory.getLogger(RouterConfig.class);
     private final HtmlManager htmlManager = new HtmlManager();
 
     public Map<URLMatcher, HttpHandler> getHandlerMap() {
         Map<URLMatcher, HttpHandler> handlerMap = new HashMap<>();
         handlerMap.putAll(staticResourceHandlerMap());
         handlerMap.putAll(apiHandlerMap());
+        handlerMap.putAll(templateResourceHandlerMap());
         return handlerMap;
     }
 
@@ -186,7 +188,8 @@ public class RouterConfig {
 
     private Map<URLMatcher, HttpHandler> staticResourceHandlerMap() {
         Map<URLMatcher, HttpHandler> staticResourceHandlerMap = new HashMap<>();
-        boolean isJar = getClass().getClassLoader().getResource("static").toString()
+        String directory = "static";
+        boolean isJar = getClass().getClassLoader().getResource(directory).toString()
                 .startsWith("jar");
         if (isJar) {
             try {
@@ -202,7 +205,7 @@ public class RouterConfig {
                         try (InputStream inputStream = jarFile.getInputStream(entry)) {
                             byte[] bytes = inputStream.readAllBytes();
 
-                            String urlTemplate = entryName.replaceFirst("static", "");
+                            String urlTemplate = entryName.replaceFirst(directory, "");
                             URLMatcher urlMatcher = URLMatcher.method(GET).urlTemplate(urlTemplate).build();
                             HttpHandler httpHandler = new StaticResourceHandler(urlTemplate, bytes);
                             staticResourceHandlerMap.put(urlMatcher, httpHandler);
@@ -215,11 +218,11 @@ public class RouterConfig {
             }
         } else {
             try {
-                Enumeration<URL> resources = getClass().getClassLoader().getResources("static");
+                Enumeration<URL> resources = getClass().getClassLoader().getResources(directory);
                 while (resources.hasMoreElements()) {
                     URL resource = resources.nextElement();
                     try {
-                        provideFile(new File(resource.getFile()), staticResourceHandlerMap);
+                        provideFile(new File(resource.getFile()), staticResourceHandlerMap, directory);
                     } catch (Exception e) {
                         logger.error(e.getMessage());
                     }
@@ -231,7 +234,7 @@ public class RouterConfig {
         return staticResourceHandlerMap;
     }
 
-    private void provideFile(File file, Map<URLMatcher, HttpHandler> map) {
+    private void provideFile(File file, Map<URLMatcher, HttpHandler> map, String directory) {
 
         if (!file.exists()) {
             return;
@@ -239,16 +242,90 @@ public class RouterConfig {
 
         if (file.isDirectory()) {
             for (File subFile : Objects.requireNonNull(file.listFiles())) {
-                provideFile(subFile, map);
+                provideFile(subFile, map, directory);
             }
         } else {
-            String path = file.getPath().split("static")[1];
+            String path = file.getPath().split(directory)[1];
             try (InputStream inputStream = new FileInputStream(file)) {
                 byte[] bytes = inputStream.readAllBytes();
 
                 String urlTemplate = path;
                 URLMatcher urlMatcher = URLMatcher.method(GET).urlTemplate(urlTemplate).build();
                 HttpHandler httpHandler = new StaticResourceHandler(urlTemplate, bytes);
+                map.put(urlMatcher, httpHandler);
+            } catch (IOException e) {
+                logger.error("Error reading from binary file: {}", path);
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    private Map<URLMatcher, HttpHandler> templateResourceHandlerMap() {
+        Map<URLMatcher, HttpHandler> templateResourceMap = new HashMap<>();
+        String directory = "templates";
+        boolean isJar = getClass().getClassLoader().getResource(directory).toString()
+                .startsWith("jar");
+        if (isJar) {
+            try {
+                String jarPath = getClass().getProtectionDomain().getCodeSource().getLocation().toURI()
+                        .getPath();
+                JarFile jarFile = new JarFile(jarPath);
+                Enumeration<JarEntry> entries = jarFile.entries();
+
+                while (entries.hasMoreElements()) {
+                    JarEntry entry = entries.nextElement();
+                    String entryName = entry.getName();
+                    if (entryName.startsWith(directory + "/") && !entry.isDirectory()) {
+                        try (InputStream inputStream = jarFile.getInputStream(entry)) {
+                            byte[] bytes = inputStream.readAllBytes();
+
+                            String urlTemplate = entryName.replaceFirst(directory, "");
+                            URLMatcher urlMatcher = URLMatcher.method(GET).urlTemplate(urlTemplate).build();
+                            HttpHandler httpHandler = new TemplateResourceHandler(urlTemplate, bytes, htmlManager);
+                            templateResourceMap.put(urlMatcher, httpHandler);
+                        }
+                    }
+                }
+                jarFile.close();
+            } catch (Exception e) {
+                logger.error(e.getMessage());
+            }
+        } else {
+            try {
+                Enumeration<URL> resources = getClass().getClassLoader().getResources(directory);
+                while (resources.hasMoreElements()) {
+                    URL resource = resources.nextElement();
+                    try {
+                        provideFileTemplate(new File(resource.getFile()), templateResourceMap, directory);
+                    } catch (Exception e) {
+                        logger.error(e.getMessage());
+                    }
+                }
+            } catch (IOException e) {
+                logger.error(e.getMessage());
+            }
+        }
+        return templateResourceMap;
+    }
+
+    private void provideFileTemplate(File file, Map<URLMatcher, HttpHandler> map, String directory) {
+
+        if (!file.exists()) {
+            return;
+        }
+
+        if (file.isDirectory()) {
+            for (File subFile : Objects.requireNonNull(file.listFiles())) {
+                provideFileTemplate(subFile, map, directory);
+            }
+        } else {
+            String path = file.getPath().split(directory)[1];
+            try (InputStream inputStream = new FileInputStream(file)) {
+                byte[] bytes = inputStream.readAllBytes();
+
+                String urlTemplate = path;
+                URLMatcher urlMatcher = URLMatcher.method(GET).urlTemplate(urlTemplate).build();
+                HttpHandler httpHandler = new TemplateResourceHandler(urlTemplate, bytes, htmlManager);
                 map.put(urlMatcher, httpHandler);
             } catch (IOException e) {
                 logger.error("Error reading from binary file: {}", path);

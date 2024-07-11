@@ -18,30 +18,26 @@ import java.io.InputStream;
 public class TemplateResourceHandler implements HttpHandler {
 
     private final Logger logger = LoggerFactory.getLogger(StaticResourceHandler.class);
-    private final HtmlManager htmlManager = new HtmlManager();
+    private final HtmlManager htmlManager;
+    private final ContentType contentType;
+    private final byte[] file;
+
+    public TemplateResourceHandler(String filename, byte[] file, HtmlManager htmlManager) {
+        this.contentType = getContentType(filename);
+        this.file = file;
+        this.htmlManager = htmlManager;
+    }
 
     @Override
     public HttpResponse doRun(HttpRequest request) {
         HttpResponse response = HttpResponse.of(HttpStatus.OK);
-        ContentType contentType = getContentType(request.path);
-        response.addHeader("Content-Type", contentType.fullType);
+        response.setContentType(contentType);
+        response.setBody(file);
         convertToHtml(request.path, request, response);
         return response;
     }
 
-    private ContentType getContentType(String fileName) {
-        // extract file extension
-        int dotIndex = fileName.lastIndexOf('.');
-        String extension = fileName.substring(dotIndex + 1);
-
-        // content type
-        return switch (dotIndex) {
-            case -1 -> ContentType.TEXT_PLAIN;
-            default -> ContentType.of(extension);
-        };
-    }
-
-    public void convertToHtml(String path, HttpRequest request, HttpResponse response) {
+    private void convertToHtml(String path, HttpRequest request, HttpResponse response) {
         try (InputStream in = this.getClass().getResourceAsStream("/templates" + path)) {
             String template = new String(in.readAllBytes());
 
@@ -58,5 +54,17 @@ public class TemplateResourceHandler implements HttpHandler {
             logger.error("Error reading from binary file: {}", path);
             throw new RuntimeException(e);
         }
+    }
+
+    private ContentType getContentType(String fileName) {
+        // extract file extension
+        int dotIndex = fileName.lastIndexOf('.');
+        String extension = fileName.substring(dotIndex + 1);
+
+        // content type
+        return switch (dotIndex) {
+            case -1 -> ContentType.TEXT_PLAIN;
+            default -> ContentType.of(extension);
+        };
     }
 }
