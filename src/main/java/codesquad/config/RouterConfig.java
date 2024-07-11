@@ -4,10 +4,7 @@ import codesquad.application.domain.User;
 import codesquad.application.repository.MyRepository;
 import codesquad.context.SessionContext;
 import codesquad.context.SessionContextManager;
-import codesquad.handler.HttpHandler;
-import codesquad.handler.StaticResourceHandler;
-import codesquad.handler.TemplateResourceHandler;
-import codesquad.handler.URLMatcher;
+import codesquad.handler.*;
 import codesquad.http.*;
 import codesquad.template.HtmlElement;
 import codesquad.template.HtmlManager;
@@ -25,6 +22,7 @@ import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
+import static codesquad.handler.HandlerBuilder.url;
 import static codesquad.http.Method.GET;
 import static codesquad.http.Method.POST;
 
@@ -35,9 +33,9 @@ public class RouterConfig {
 
     private final Logger logger = LoggerFactory.getLogger(RouterConfig.class);
     private final HtmlManager htmlManager = new HtmlManager();
+    private final Map<URLMatcher, HttpHandler> handlerMap = new HashMap<>();
 
     public Map<URLMatcher, HttpHandler> getHandlerMap() {
-        Map<URLMatcher, HttpHandler> handlerMap = new HashMap<>();
         handlerMap.putAll(staticResourceHandlerMap());
         handlerMap.putAll(apiHandlerMap());
         handlerMap.putAll(templateResourceHandlerMap());
@@ -47,51 +45,20 @@ public class RouterConfig {
     private Map<URLMatcher, HttpHandler> apiHandlerMap() {
         Map<URLMatcher, HttpHandler> map = new HashMap<>();
 
-        map.put(
-                URLMatcher.method(GET).urlTemplate("/registration").build(), request -> {
+        get(
+                url("/registration").logic(request -> {
                     HttpResponse response = HttpResponse.of(HttpStatus.MOVED_PERMANENTLY);
                     response.addHeader("Location", "/registration/index.html");
                     return response;
-                }
-        );
+                }),
 
-        map.put(
-                URLMatcher.method(POST).urlTemplate("/user/create").build(), request -> {
-                    HttpResponse response;
-                    if (!(
-                            request.method.equals(POST) &&
-                            request.getHeader("Content-Type").contains("application/x-www-form-urlencoded")
-                    )) {
-                        response = HttpResponse.of(HttpStatus.BAD_REQUEST);
-                        return response;
-                    }
-
-                    String userId = readSingleBodyParam(request, "userId");
-                    String password = readSingleBodyParam(request, "password");
-                    String nickname = readSingleBodyParam(request, "nickname");
-
-                    // save user
-                    User user = new User(userId, password, nickname);
-                    MyRepository.source.save(userId, user);
-
-                    response = HttpResponse.of(HttpStatus.SEE_OTHER);
-                    response.addHeader("Location", "/index.html");
-
-                    logger.debug("User created: {}", user);
-                    return response;
-                }
-        );
-
-        map.put(
-                URLMatcher.method(GET).urlTemplate("/login").build(), request -> {
+                url("/login").logic(request -> {
                     HttpResponse response = HttpResponse.of(HttpStatus.MOVED_PERMANENTLY);
                     response.addHeader("Location", "/login/index.html");
                     return response;
-                }
-        );
+                }),
 
-        map.put(
-                URLMatcher.method(GET).urlTemplate("/logout").build(), request -> {
+                url("/logout").logic(request -> {
                     SessionContext session = SessionContextManager.getSession(request);
                     if (session != null) {
                         SessionContextManager.clearContext(request);
@@ -100,44 +67,9 @@ public class RouterConfig {
                     response.addHeader("Location", "/index.html");
                     response.addHeader("Set-Cookie", "SID=; Max-Age=0");
                     return response;
-                }
-        );
+                }),
 
-        map.put(
-                URLMatcher.method(POST).urlTemplate("/signin").build(), request -> {
-                    HttpResponse response;
-                    if (!(
-                            request.method.equals(Method.POST) &&
-                            request.getHeader("Content-Type").contains("application/x-www-form-urlencoded")
-                    )) {
-                        response = HttpResponse.of(HttpStatus.BAD_REQUEST);
-                        return response;
-                    }
-
-                    String userId = readSingleBodyParam(request, "userId");
-                    String password = readSingleBodyParam(request, "password");
-
-                    User user = MyRepository.source.findUser(userId);
-                    if (user != null && user.getPassword().equals(password)) {
-
-                        String sid = SessionContextManager.createContext();
-                        SessionContext context = SessionContextManager.getContext(sid);
-                        context.setAttributes("user", user);
-
-                        response = HttpResponse.of(HttpStatus.SEE_OTHER);
-                        response.addHeader("Location", "/index.html");
-                        response.addHeader("Set-Cookie", "SID=" + sid);
-                    } else {
-                        response = HttpResponse.of(HttpStatus.SEE_OTHER);
-                        response.addHeader("Location", "/login/fail.html");
-                    }
-
-                    return response;
-                }
-        );
-
-        map.put(
-                URLMatcher.method(GET).urlTemplate("/user/list").build(), request -> {
+                url("/user/list").logic(request -> {
                     try (InputStream input = this.getClass().getResourceAsStream("/templates/user/list.html")) {
 
                         HttpResponse response;
@@ -180,7 +112,65 @@ public class RouterConfig {
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
-                }
+                })
+        );
+
+        post(
+                url("/user/create")
+                        .logic(request -> {
+                            HttpResponse response;
+                            if (!(
+                                    request.method.equals(POST) &&
+                                    request.getHeader("Content-Type").contains("application/x-www-form-urlencoded")
+                            )) {
+                                response = HttpResponse.of(HttpStatus.BAD_REQUEST);
+                                return response;
+                            }
+
+                            String userId = readSingleBodyParam(request, "userId");
+                            String password = readSingleBodyParam(request, "password");
+                            String nickname = readSingleBodyParam(request, "nickname");
+
+                            // save user
+                            User user = new User(userId, password, nickname);
+                            MyRepository.source.save(userId, user);
+
+                            response = HttpResponse.of(HttpStatus.SEE_OTHER);
+                            response.addHeader("Location", "/index.html");
+
+                            logger.debug("User created: {}", user);
+                            return response;
+                        }),
+                url("/signin").logic(request -> {
+                    HttpResponse response;
+                    if (!(
+                            request.method.equals(Method.POST) &&
+                            request.getHeader("Content-Type").contains("application/x-www-form-urlencoded")
+                    )) {
+                        response = HttpResponse.of(HttpStatus.BAD_REQUEST);
+                        return response;
+                    }
+
+                    String userId = readSingleBodyParam(request, "userId");
+                    String password = readSingleBodyParam(request, "password");
+
+                    User user = MyRepository.source.findUser(userId);
+                    if (user != null && user.getPassword().equals(password)) {
+
+                        String sid = SessionContextManager.createContext();
+                        SessionContext context = SessionContextManager.getContext(sid);
+                        context.setAttributes("user", user);
+
+                        response = HttpResponse.of(HttpStatus.SEE_OTHER);
+                        response.addHeader("Location", "/index.html");
+                        response.addHeader("Set-Cookie", "SID=" + sid);
+                    } else {
+                        response = HttpResponse.of(HttpStatus.SEE_OTHER);
+                        response.addHeader("Location", "/login/fail.html");
+                    }
+
+                    return response;
+                })
         );
 
         return map;
@@ -350,5 +340,22 @@ public class RouterConfig {
             case -1 -> ContentType.TEXT_PLAIN;
             default -> ContentType.of(extension);
         };
+    }
+
+    public RouterConfig get(HandlerBuilder... builders) {
+        return method(new Method[]{GET}, builders);
+    }
+
+    public RouterConfig post(HandlerBuilder... builders) {
+        return method(new Method[]{POST}, builders);
+    }
+
+    public RouterConfig method(Method[] methods, HandlerBuilder... builders) {
+        for (HandlerBuilder builder : builders) {
+            URLMatcher urlMatcher = URLMatcher.method(methods).urlTemplate(builder.url()).build();
+            HttpHandler httpHandler = builder.handler();
+            handlerMap.put(urlMatcher, httpHandler);
+        }
+        return this;
     }
 }

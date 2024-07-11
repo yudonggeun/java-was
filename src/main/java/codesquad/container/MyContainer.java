@@ -11,10 +11,6 @@ public class MyContainer {
 
     private final ApplicationContext context = ApplicationContext.context;
 
-    {
-        context.getRouterConfig();
-    }
-
     public HttpResponse doRun(HttpRequest request) {
 
         final FilterChain filterChain = new FilterChainImpl(context.getFilterConfig());
