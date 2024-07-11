@@ -38,7 +38,7 @@ public class ApplicationContext {
             logger.info("init router config");
             routerConfig = new RouterConfig();
         }
-        return new RouterConfig();
+        return routerConfig;
     }
 
     private HtmlManager htmlManager;

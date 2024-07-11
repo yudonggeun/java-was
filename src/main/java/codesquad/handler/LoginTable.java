@@ -35,6 +35,12 @@ public class LoginTable extends RouteTable {
     protected List<RouteEntry> table() {
         return List.of(
                 // get
+                get("/").logic(request -> {
+                    HttpResponse response = HttpResponse.of(HttpStatus.MOVED_PERMANENTLY);
+                    response.addHeader("Location", "/index.html");
+                    return response;
+                }),
+
                 get("/registration").logic(request -> {
                     HttpResponse response = HttpResponse.of(HttpStatus.MOVED_PERMANENTLY);
                     response.addHeader("Location", "/registration/index.html");

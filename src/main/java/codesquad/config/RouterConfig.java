@@ -26,9 +26,12 @@ public class RouterConfig {
     private final HtmlManager htmlManager = new HtmlManager();
     private final Map<URLMatcher, HttpHandler> handlerMap = new HashMap<>();
 
-    public Map<URLMatcher, HttpHandler> getHandlerMap() {
+    public RouterConfig() {
         handlerMap.putAll(staticResourceHandlerMap());
         handlerMap.putAll(templateResourceHandlerMap());
+    }
+
+    public Map<URLMatcher, HttpHandler> getHandlerMap() {
         return handlerMap;
     }
 
