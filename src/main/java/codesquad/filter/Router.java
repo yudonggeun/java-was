@@ -7,24 +7,22 @@ import codesquad.http.HttpRequest;
 import codesquad.http.HttpResponse;
 import codesquad.http.HttpStatus;
 
-import java.util.Map;
-
 /**
  * 반드시 마지막에 실행이 되어야하는 필터입니다.
  * 실제 서비스의 로직을 실행하기 위한 진입점으로 사용하는 필터입니다.
  */
 public class Router implements Filter {
 
-    private final Map<URLMatcher, HttpHandler> handlerMap;
+    private final RouterConfig config;
 
     public Router(RouterConfig config) {
-        this.handlerMap = config.getHandlerMap();
+        this.config = config;
     }
 
     @Override
     public void doFilter(HttpRequest request, HttpResponse response, FilterChain chain) {
 
-        for (var entry : handlerMap.entrySet()) {
+        for (var entry : config.getHandlerMap().entrySet()) {
             URLMatcher urlMatcher = entry.getKey();
             if (urlMatcher.isMatch(request)) {
                 HttpHandler httpHandler = entry.getValue();
