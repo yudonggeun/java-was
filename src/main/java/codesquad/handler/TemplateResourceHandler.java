@@ -17,7 +17,7 @@ import java.io.InputStream;
 
 public class TemplateResourceHandler implements HttpHandler {
 
-    private final Logger logger = LoggerFactory.getLogger(StaticResourceHandler.class);
+    private final Logger logger = LoggerFactory.getLogger(TemplateResourceHandler.class);
     private final HtmlManager htmlManager;
     private final ContentType contentType;
     private final byte[] file;
