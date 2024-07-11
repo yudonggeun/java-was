@@ -207,7 +207,7 @@ public class RouterConfig {
 
                             String urlTemplate = entryName.replaceFirst(directory, "");
                             URLMatcher urlMatcher = URLMatcher.method(GET).urlTemplate(urlTemplate).build();
-                            HttpHandler httpHandler = new StaticResourceHandler(urlTemplate, bytes);
+                            HttpHandler httpHandler = new StaticResourceHandler(getContentType(urlTemplate), bytes);
                             staticResourceHandlerMap.put(urlMatcher, httpHandler);
                         }
                     }
@@ -251,7 +251,7 @@ public class RouterConfig {
 
                 String urlTemplate = path;
                 URLMatcher urlMatcher = URLMatcher.method(GET).urlTemplate(urlTemplate).build();
-                HttpHandler httpHandler = new StaticResourceHandler(urlTemplate, bytes);
+                HttpHandler httpHandler = new StaticResourceHandler(getContentType(urlTemplate), bytes);
                 map.put(urlMatcher, httpHandler);
             } catch (IOException e) {
                 logger.error("Error reading from binary file: {}", path);
@@ -281,7 +281,7 @@ public class RouterConfig {
 
                             String urlTemplate = entryName.replaceFirst(directory, "");
                             URLMatcher urlMatcher = URLMatcher.method(GET).urlTemplate(urlTemplate).build();
-                            HttpHandler httpHandler = new TemplateResourceHandler(urlTemplate, bytes, htmlManager);
+                            HttpHandler httpHandler = new TemplateResourceHandler(getContentType(urlTemplate), bytes, htmlManager);
                             templateResourceMap.put(urlMatcher, httpHandler);
                         }
                     }
@@ -325,7 +325,7 @@ public class RouterConfig {
 
                 String urlTemplate = path;
                 URLMatcher urlMatcher = URLMatcher.method(GET).urlTemplate(urlTemplate).build();
-                HttpHandler httpHandler = new TemplateResourceHandler(urlTemplate, bytes, htmlManager);
+                HttpHandler httpHandler = new TemplateResourceHandler(getContentType(urlTemplate), bytes, htmlManager);
                 map.put(urlMatcher, httpHandler);
             } catch (IOException e) {
                 logger.error("Error reading from binary file: {}", path);
@@ -340,4 +340,15 @@ public class RouterConfig {
         return null;
     }
 
+    private ContentType getContentType(String fileName) {
+        // extract file extension
+        int dotIndex = fileName.lastIndexOf('.');
+        String extension = fileName.substring(dotIndex + 1);
+
+        // content type
+        return switch (dotIndex) {
+            case -1 -> ContentType.TEXT_PLAIN;
+            default -> ContentType.of(extension);
+        };
+    }
 }

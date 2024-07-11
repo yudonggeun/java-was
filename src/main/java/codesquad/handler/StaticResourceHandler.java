@@ -10,8 +10,8 @@ public class StaticResourceHandler implements HttpHandler {
     private final byte[] file;
     private final ContentType contentType;
 
-    public StaticResourceHandler(String filename, byte[] file) {
-        this.contentType = getContentType(filename);
+    public StaticResourceHandler(ContentType contentType, byte[] file) {
+        this.contentType = contentType;
         this.file = file;
     }
 
@@ -21,17 +21,5 @@ public class StaticResourceHandler implements HttpHandler {
         response.setContentType(contentType);
         response.setBody(file);
         return response;
-    }
-
-    private ContentType getContentType(String fileName) {
-        // extract file extension
-        int dotIndex = fileName.lastIndexOf('.');
-        String extension = fileName.substring(dotIndex + 1);
-
-        // content type
-        return switch (dotIndex) {
-            case -1 -> ContentType.TEXT_PLAIN;
-            default -> ContentType.of(extension);
-        };
     }
 }

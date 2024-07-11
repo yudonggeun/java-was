@@ -22,8 +22,8 @@ public class TemplateResourceHandler implements HttpHandler {
     private final ContentType contentType;
     private final byte[] file;
 
-    public TemplateResourceHandler(String filename, byte[] file, HtmlManager htmlManager) {
-        this.contentType = getContentType(filename);
+    public TemplateResourceHandler(ContentType contentType, byte[] file, HtmlManager htmlManager) {
+        this.contentType = contentType;
         this.file = file;
         this.htmlManager = htmlManager;
     }
@@ -56,15 +56,4 @@ public class TemplateResourceHandler implements HttpHandler {
         }
     }
 
-    private ContentType getContentType(String fileName) {
-        // extract file extension
-        int dotIndex = fileName.lastIndexOf('.');
-        String extension = fileName.substring(dotIndex + 1);
-
-        // content type
-        return switch (dotIndex) {
-            case -1 -> ContentType.TEXT_PLAIN;
-            default -> ContentType.of(extension);
-        };
-    }
 }
