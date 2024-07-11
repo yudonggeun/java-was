@@ -14,18 +14,11 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
 
 public class TemplateResourceHandler implements HttpHandler {
 
     private final Logger logger = LoggerFactory.getLogger(StaticResourceHandler.class);
     private final HtmlManager htmlManager = new HtmlManager();
-
-    @Override
-    public boolean match(HttpRequest request) {
-        URL resource = this.getClass().getResource("/templates" + request.path);
-        return resource != null && resource.getPath().contains(".");
-    }
 
     @Override
     public HttpResponse doRun(HttpRequest request) {

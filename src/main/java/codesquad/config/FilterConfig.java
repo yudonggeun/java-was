@@ -1,4 +1,7 @@
-package codesquad.filter;
+package codesquad.config;
+
+import codesquad.context.ApplicationContext;
+import codesquad.filter.*;
 
 import java.util.Arrays;
 
@@ -19,13 +22,27 @@ import java.util.Arrays;
  */
 public class FilterConfig {
 
+    private final ApplicationContext context;
     private final Filter[] filters;
     private final Filter handlerFilter;
 
-    public FilterConfig(Filter handlerFilter, Filter... filters) {
-        this.filters = filters;
-        this.handlerFilter = handlerFilter;
+    public FilterConfig(ApplicationContext context) {
+        this.context = context;
+        this.filters = initFilters();
+        this.handlerFilter = initHandlerFilter();
         Arrays.sort(this.filters);
+    }
+
+    private Filter initHandlerFilter() {
+        return new Router(context.getRouterConfig());
+    }
+
+    private Filter[] initFilters() {
+        return new Filter[]{
+                new HttpLoggingFilter(),
+                new CharSetFilter("UTF-8"),
+                new AcceptHeaderFilter()
+        };
     }
 
     public Filter[] getFilters() {

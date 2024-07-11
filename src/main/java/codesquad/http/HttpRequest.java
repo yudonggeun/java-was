@@ -33,9 +33,11 @@ public class HttpRequest {
             path = getAndGetPath(tokens[1]);
             version = tokens[2];
 
-            while (!(line = br.readLine()).isEmpty()) {
+            line = br.readLine();
+            while (line != null && !line.isEmpty()) {
                 tokens = line.split(": ");
                 headers.put(tokens[0], tokens[1]);
+                line = br.readLine();
             }
 
             if (existBody()) {

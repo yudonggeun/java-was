@@ -4,30 +4,22 @@ import codesquad.http.ContentType;
 import codesquad.http.HttpRequest;
 import codesquad.http.HttpResponse;
 import codesquad.http.HttpStatus;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
 
 public class StaticResourceHandler implements HttpHandler {
 
-    private final Logger logger = LoggerFactory.getLogger(StaticResourceHandler.class);
+    private final byte[] file;
+    private final ContentType contentType;
 
-    @Override
-    public boolean match(HttpRequest request) {
-        URL resource = this.getClass().getResource("/static" + request.path);
-        return resource != null && resource.getPath().contains(".");
+    public StaticResourceHandler(String filename, byte[] file) {
+        this.contentType = getContentType(filename);
+        this.file = file;
     }
 
     @Override
     public HttpResponse doRun(HttpRequest request) {
         HttpResponse response = HttpResponse.of(HttpStatus.OK);
-        ContentType contentType = getContentType(request.path);
-        response.addHeader("Content-Type", contentType.fullType);
-        writeFileToBody(request.path, response);
+        response.setContentType(contentType);
+        response.setBody(file);
         return response;
     }
 
@@ -41,19 +33,5 @@ public class StaticResourceHandler implements HttpHandler {
             case -1 -> ContentType.TEXT_PLAIN;
             default -> ContentType.of(extension);
         };
-    }
-
-    private void writeFileToBody(String path, HttpResponse response) {
-
-        try (InputStream in = this.getClass().getResourceAsStream("/static" + path)) {
-            byte[] fileContentBytes = in.readAllBytes();
-            response.setBody(fileContentBytes);
-        } catch (FileNotFoundException e) {
-            logger.error("File not found: {}", path);
-            throw new RuntimeException(e);
-        } catch (IOException e) {
-            logger.error("Error reading from binary file: {}", path);
-            throw new RuntimeException(e);
-        }
     }
 }
