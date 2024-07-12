@@ -2,7 +2,10 @@ package codesquad.config;
 
 import codesquad.handler.*;
 import codesquad.http.ContentType;
+import codesquad.http.HttpRequest;
+import codesquad.http.Method;
 import codesquad.template.HtmlManager;
+import codesquad.util.collections.Tries;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,20 +28,47 @@ public class RouterConfig {
     private final Logger logger = LoggerFactory.getLogger(RouterConfig.class);
     private final HtmlManager htmlManager = new HtmlManager();
     private final Map<URLMatcher, HttpHandler> handlerMap = new HashMap<>();
+    private final Map<Method, Tries<HttpHandler>> methodTries = new HashMap<>();
 
     public RouterConfig() {
+        // static
+        for (var entry : staticResourceHandlerMap().entrySet()) {
+            URLMatcher urlMatcher = entry.getKey();
+            HttpHandler handler = entry.getValue();
+            for (Method method : urlMatcher.getMethods()) {
+                methodTries.putIfAbsent(method, new Tries<>());
+                methodTries.get(method).insert(urlMatcher.getUrlTemplate(), handler);
+            }
+        }
+
+        // template
+        for (var entry : templateResourceHandlerMap().entrySet()) {
+            URLMatcher urlMatcher = entry.getKey();
+            HttpHandler handler = entry.getValue();
+            for (Method method : urlMatcher.getMethods()) {
+                methodTries.putIfAbsent(method, new Tries<>());
+                methodTries.get(method).insert(urlMatcher.getUrlTemplate(), handler);
+            }
+        }
+
         handlerMap.putAll(staticResourceHandlerMap());
         handlerMap.putAll(templateResourceHandlerMap());
     }
 
-    public Map<URLMatcher, HttpHandler> getHandlerMap() {
-        return handlerMap;
-    }
-
     public void setRoute(List<RouteEntry> route) {
         for (RouteEntry entry : route) {
-            handlerMap.put(entry.urlMatcher(), entry.httpHandler());
+            URLMatcher urlMatcher = entry.urlMatcher();
+            HttpHandler handler = entry.httpHandler();
+            for (Method method : urlMatcher.getMethods()) {
+                methodTries.putIfAbsent(method, new Tries<>());
+                methodTries.get(method).insert(urlMatcher.getUrlTemplate(), handler);
+            }
         }
+    }
+
+    public Optional<HttpHandler> findHandler(HttpRequest request) {
+        Tries<HttpHandler> tries = methodTries.getOrDefault(request.method, new Tries<>());
+        return tries.search(request.path);
     }
 
     private Map<URLMatcher, HttpHandler> staticResourceHandlerMap() {

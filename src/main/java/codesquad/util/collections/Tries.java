@@ -6,7 +6,7 @@ public class Tries<T> {
 
     TriesNode<T> root = new TriesNode<>();
 
-    void insert(String url, T value) {
+    public void insert(String url, T value) {
         if (url == null) return;
 
         TriesNode<T> node = this.root;

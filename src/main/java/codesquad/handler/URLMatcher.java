@@ -36,6 +36,14 @@ public class URLMatcher {
         return Arrays.asList(methods).contains(method);
     }
 
+    public String getUrlTemplate() {
+        return urlTemplate;
+    }
+
+    public Method[] getMethods() {
+        return methods;
+    }
+
     public static class Builder {
         private Method[] methods;
         private String urlTemplate;
