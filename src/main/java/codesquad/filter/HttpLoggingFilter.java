@@ -2,12 +2,14 @@ package codesquad.filter;
 
 import codesquad.http.HttpRequest;
 import codesquad.http.HttpResponse;
+import codesquad.util.scan.Solo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * HTTP 요청과 응답에 대한 로깅을 수행하는 필터입니다.
  */
+@Solo
 public class HttpLoggingFilter implements Filter {
 
     private final Logger logger = LoggerFactory.getLogger(HttpLoggingFilter.class);

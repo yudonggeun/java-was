@@ -5,6 +5,7 @@ import codesquad.handler.HttpHandler;
 import codesquad.http.HttpRequest;
 import codesquad.http.HttpResponse;
 import codesquad.http.HttpStatus;
+import codesquad.util.scan.Solo;
 
 import java.util.Optional;
 
@@ -12,7 +13,8 @@ import java.util.Optional;
  * 반드시 마지막에 실행이 되어야하는 필터입니다.
  * 실제 서비스의 로직을 실행하기 위한 진입점으로 사용하는 필터입니다.
  */
-public class Router implements Filter {
+@Solo
+public class Router {
 
     private final RouterConfig config;
 
@@ -20,8 +22,7 @@ public class Router implements Filter {
         this.config = config;
     }
 
-    @Override
-    public void doFilter(HttpRequest request, HttpResponse response, FilterChain chain) {
+    public void handle(HttpRequest request, HttpResponse response, FilterChain chain) {
 
         Optional<HttpHandler> handler = config.findHandler(request);
         if (handler.isPresent()) {

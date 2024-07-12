@@ -22,8 +22,25 @@ public class ApplicationContext {
     private final Set<Class<?>> waitingSolos = new HashSet<>();
     private final Map<Class<?>, Object> soloObject = new HashMap<>();
 
+    public ApplicationContext() {
+        this.registerSingleTon(this);
+    }
+
     public <T> T getSoloObject(Class<T> clazz) {
         return clazz.cast(soloObject.get(clazz));
+    }
+
+    public <T> List<T> getSoloObjects(Class<T> interfaze) {
+        List<T> objects = new ArrayList<>();
+        for (Class<?> key : soloObject.keySet()) {
+            for (Class<?> anInterface : key.getInterfaces()) {
+                if (anInterface.equals(interfaze)) {
+                    objects.add((T) getSoloObject(key));
+                    break;
+                }
+            }
+        }
+        return objects;
     }
 
     /**
