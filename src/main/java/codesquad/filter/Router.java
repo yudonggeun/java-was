@@ -10,8 +10,8 @@ import codesquad.util.scan.Solo;
 import java.util.Optional;
 
 /**
- * 반드시 마지막에 실행이 되어야하는 필터입니다.
- * 실제 서비스의 로직을 실행하기 위한 진입점으로 사용하는 필터입니다.
+ * 요청에 대당하는 핸들러를 호출하여 실행하는 진입점입니다.
+ * @see FilterChain 를 통해 요청에 대한 필터 체인을 실행합니다.
  */
 @Solo
 public class Router {

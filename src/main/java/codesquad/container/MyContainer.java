@@ -2,7 +2,6 @@ package codesquad.container;
 
 import codesquad.config.FilterConfig;
 import codesquad.filter.FilterChain;
-import codesquad.filter.FilterChainImpl;
 import codesquad.http.HttpRequest;
 import codesquad.http.HttpResponse;
 import codesquad.http.HttpStatus;
@@ -17,7 +16,7 @@ public class MyContainer {
 
     public HttpResponse doRun(HttpRequest request) {
 
-        final FilterChain filterChain = new FilterChainImpl(config);
+        final FilterChain filterChain = new FilterChain(config);
 
         HttpResponse response = HttpResponse.of(HttpStatus.INTERNAL_SERVER_ERROR);
         filterChain.doFilter(request, response);
