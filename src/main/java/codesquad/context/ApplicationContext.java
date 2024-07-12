@@ -22,8 +22,8 @@ public class ApplicationContext {
     private final Set<Class<?>> waitingSolos = new HashSet<>();
     private final Map<Class<?>, Object> soloObject = new HashMap<>();
 
-    public Object getSoloObject(Class<?> clazz) {
-        return soloObject.get(clazz);
+    public <T> T getSoloObject(Class<T> clazz) {
+        return clazz.cast(soloObject.get(clazz));
     }
 
     /**

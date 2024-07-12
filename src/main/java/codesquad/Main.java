@@ -19,7 +19,7 @@ public class Main {
 
         ServerSocket serverSocket = new ServerSocket(8080);
         ExecutorService executorService = getExecutorService();
-        MyContainer container = new MyContainer((FilterConfig) context.getSoloObject(FilterConfig.class));
+        MyContainer container = new MyContainer(context.getSoloObject(FilterConfig.class));
         SocketFactory socketFactory = new SocketFactory();
 
         EndPoint endPoint = new EndPoint(serverSocket, executorService, socketFactory, container);
