@@ -1,37 +1,38 @@
 package codesquad.context;
 
 import codesquad.http.HttpRequest;
+import codesquad.util.scan.Solo;
 
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+@Solo
 public class SessionContextManager {
 
-    private static final SessionContextManager instance = new SessionContextManager();
     public final ConcurrentHashMap<String, SessionContext> sessionContexts = new ConcurrentHashMap<>();
 
-    public static String createContext() {
+    public String createContext() {
         String sid = UUID.randomUUID().toString();
-        instance.sessionContexts.put(sid, new SessionContext());
+        sessionContexts.put(sid, new SessionContext());
         return sid;
     }
 
-    public static SessionContext getContext(String sid) {
+    public SessionContext getContext(String sid) {
         if (sid == null) return null;
-        return instance.sessionContexts.get(sid);
+        return sessionContexts.get(sid);
     }
 
-    public static void clearContext(HttpRequest request) {
+    public void clearContext(HttpRequest request) {
         String sid = getSessionId(request);
-        instance.sessionContexts.remove(sid);
+        sessionContexts.remove(sid);
     }
 
-    public static SessionContext getSession(HttpRequest request) {
+    public SessionContext getSession(HttpRequest request) {
         String sid = getSessionId(request);
         return getContext(sid);
     }
 
-    private static String getSessionId(HttpRequest request) {
+    private String getSessionId(HttpRequest request) {
         String sid = null;
         String cookies = request.getHeader("Cookie");
         if (cookies == null) return null;

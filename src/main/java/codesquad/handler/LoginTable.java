@@ -28,6 +28,7 @@ public class LoginTable {
 
     private final Logger logger = LoggerFactory.getLogger(LoginTable.class);
     private final HtmlManager htmlManager;
+    private final SessionContextManager sessionContextManager;
 
     private final Map<URLMatcher, HttpHandler> table = Map.of(
 
@@ -54,9 +55,9 @@ public class LoginTable {
 
             get("/logout").build(),
             request -> {
-                SessionContext session = SessionContextManager.getSession(request);
+                SessionContext session = sessionContextManager().getSession(request);
                 if (session != null) {
-                    SessionContextManager.clearContext(request);
+                    sessionContextManager().clearContext(request);
                 }
                 HttpResponse response = HttpResponse.of(HttpStatus.SEE_OTHER);
                 response.addHeader("Location", "/index.html");
@@ -73,7 +74,7 @@ public class LoginTable {
                     String html = new String(input.readAllBytes());
                     HtmlRoot root = htmlManager().create(html);
 
-                    SessionContext session = SessionContextManager.getSession(request);
+                    SessionContext session = sessionContextManager().getSession(request);
                     if (session == null) {
                         response = HttpResponse.of(HttpStatus.FOUND);
                         response.addHeader("Location", "/login/index.html");
@@ -152,8 +153,8 @@ public class LoginTable {
                 User user = MyRepository.source.findUser(userId);
                 if (user != null && user.getPassword().equals(password)) {
 
-                    String sid = SessionContextManager.createContext();
-                    SessionContext context = SessionContextManager.getContext(sid);
+                    String sid = sessionContextManager().createContext();
+                    SessionContext context = sessionContextManager().getContext(sid);
                     context.setAttributes("user", user);
 
                     response = HttpResponse.of(HttpStatus.SEE_OTHER);
@@ -168,13 +169,18 @@ public class LoginTable {
             }
     );
 
-    public LoginTable(RouterConfig config, HtmlManager htmlManager) {
+    public LoginTable(RouterConfig config, HtmlManager htmlManager, SessionContextManager sessionContextManager) {
         this.htmlManager = htmlManager;
+        this.sessionContextManager = sessionContextManager;
         config.setRoute(table);
     }
 
     private HtmlManager htmlManager() {
         return htmlManager;
+    }
+
+    private SessionContextManager sessionContextManager() {
+        return sessionContextManager;
     }
 
     private String readSingleBodyParam(HttpRequest request, String attr) {
