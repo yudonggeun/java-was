@@ -7,6 +7,8 @@ import codesquad.template.HtmlManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Map;
+
 public class ApplicationContext {
 
     public static ApplicationContext context = new ApplicationContext();
@@ -19,6 +21,16 @@ public class ApplicationContext {
 
         // router init
         context.getLoginHandler();
+    }
+
+    private Map<Class<?>, Object> soloObject;
+
+    public void registerSingleTon(Object solo) {
+        soloObject.putIfAbsent(solo.getClass(), solo);
+    }
+
+    public Object getSoloObject(Class<?> clazz) {
+        return soloObject.get(clazz);
     }
 
     private FilterConfig filterConfig;
