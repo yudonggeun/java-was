@@ -35,6 +35,27 @@ public class HtmlManager {
         return root;
     }
 
+    public HtmlElement createElement(String html) {
+        Deque<String> tags = new LinkedList<>();
+        StringBuilder tag = new StringBuilder();
+        char[] templates = html.toCharArray();
+        for (int i = 0; i < html.length(); i++) {
+            if (templates[i] == '<') {
+                if (!tag.isEmpty() && !tag.toString().trim().isEmpty()) tags.add(tag.toString());
+                tag = new StringBuilder();
+                tag.append(templates[i]);
+            } else if (templates[i] == '>') {
+                tag.append(templates[i]);
+                if (!tag.isEmpty() && !tag.toString().trim().isEmpty()) tags.add(tag.toString());
+                tag = new StringBuilder();
+            } else {
+                tag.append(templates[i]);
+            }
+        }
+
+        return extractElement(tags).build();
+    }
+
     private HtmlElementBuilder extractElement(Deque<String> tags) {
         String firstTags = tags.pollFirst();
         HtmlElementBuilder elementBuilder = HtmlElement.create(firstTags);

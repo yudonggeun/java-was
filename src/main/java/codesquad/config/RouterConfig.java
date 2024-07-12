@@ -1,6 +1,9 @@
 package codesquad.config;
 
-import codesquad.handler.*;
+import codesquad.handler.HttpHandler;
+import codesquad.handler.StaticResourceHandler;
+import codesquad.handler.TemplateResourceHandler;
+import codesquad.handler.URLMatcher;
 import codesquad.http.ContentType;
 import codesquad.http.HttpRequest;
 import codesquad.http.Method;
@@ -33,34 +36,14 @@ public class RouterConfig {
     private final Map<Method, Tries<HttpHandler>> methodTries = new HashMap<>();
 
     public RouterConfig() {
-        // static
-        for (var entry : staticResourceHandlerMap().entrySet()) {
-            URLMatcher urlMatcher = entry.getKey();
-            HttpHandler handler = entry.getValue();
-            for (Method method : urlMatcher.getMethods()) {
-                methodTries.putIfAbsent(method, new Tries<>());
-                methodTries.get(method).insert(urlMatcher.getUrlTemplate(), handler);
-            }
-        }
-
-        // template
-        for (var entry : templateResourceHandlerMap().entrySet()) {
-            URLMatcher urlMatcher = entry.getKey();
-            HttpHandler handler = entry.getValue();
-            for (Method method : urlMatcher.getMethods()) {
-                methodTries.putIfAbsent(method, new Tries<>());
-                methodTries.get(method).insert(urlMatcher.getUrlTemplate(), handler);
-            }
-        }
-
-        handlerMap.putAll(staticResourceHandlerMap());
-        handlerMap.putAll(templateResourceHandlerMap());
+        setRoute(staticResourceHandlerMap());
+        setRoute(templateResourceHandlerMap());
     }
 
-    public void setRoute(List<RouteEntry> route) {
-        for (RouteEntry entry : route) {
-            URLMatcher urlMatcher = entry.urlMatcher();
-            HttpHandler handler = entry.httpHandler();
+    public void setRoute(Map<URLMatcher, HttpHandler> map) {
+        for (var entry : map.entrySet()) {
+            URLMatcher urlMatcher = entry.getKey();
+            HttpHandler handler = entry.getValue();
             for (Method method : urlMatcher.getMethods()) {
                 methodTries.putIfAbsent(method, new Tries<>());
                 methodTries.get(method).insert(urlMatcher.getUrlTemplate(), handler);
@@ -93,7 +76,7 @@ public class RouterConfig {
                             byte[] bytes = inputStream.readAllBytes();
 
                             String urlTemplate = entryName.replaceFirst(directory, "");
-                            URLMatcher urlMatcher = URLMatcher.method(GET).urlTemplate(urlTemplate).build();
+                            URLMatcher urlMatcher = URLMatcher.method(GET).url(urlTemplate).build();
                             HttpHandler httpHandler = new StaticResourceHandler(getContentType(urlTemplate), bytes);
                             staticResourceHandlerMap.put(urlMatcher, httpHandler);
                         }
@@ -137,7 +120,7 @@ public class RouterConfig {
                 byte[] bytes = inputStream.readAllBytes();
 
                 String urlTemplate = path;
-                URLMatcher urlMatcher = URLMatcher.method(GET).urlTemplate(urlTemplate).build();
+                URLMatcher urlMatcher = URLMatcher.method(GET).url(urlTemplate).build();
                 HttpHandler httpHandler = new StaticResourceHandler(getContentType(urlTemplate), bytes);
                 map.put(urlMatcher, httpHandler);
             } catch (IOException e) {
@@ -167,7 +150,7 @@ public class RouterConfig {
                             byte[] bytes = inputStream.readAllBytes();
 
                             String urlTemplate = entryName.replaceFirst(directory, "");
-                            URLMatcher urlMatcher = URLMatcher.method(GET).urlTemplate(urlTemplate).build();
+                            URLMatcher urlMatcher = URLMatcher.method(GET).url(urlTemplate).build();
                             HttpHandler httpHandler = new TemplateResourceHandler(getContentType(urlTemplate), bytes, htmlManager);
                             templateResourceMap.put(urlMatcher, httpHandler);
                         }
@@ -211,7 +194,7 @@ public class RouterConfig {
                 byte[] bytes = inputStream.readAllBytes();
 
                 String urlTemplate = path;
-                URLMatcher urlMatcher = URLMatcher.method(GET).urlTemplate(urlTemplate).build();
+                URLMatcher urlMatcher = URLMatcher.method(GET).url(urlTemplate).build();
                 HttpHandler httpHandler = new TemplateResourceHandler(getContentType(urlTemplate), bytes, htmlManager);
                 map.put(urlMatcher, httpHandler);
             } catch (IOException e) {

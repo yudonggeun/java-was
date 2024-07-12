@@ -1,9 +1,6 @@
 package codesquad.handler;
 
-import codesquad.http.HttpRequest;
 import codesquad.http.Method;
-
-import java.util.Arrays;
 
 /**
  * http request의 요청과 대응하는지 검사하는 클래스입니다.
@@ -18,24 +15,27 @@ public class URLMatcher {
         this.urlTemplate = urlTemplate;
     }
 
-    // builder
     public static Builder method(Method... methods) {
-        return new Builder().methods(methods);
+        return new Builder(methods);
     }
 
-    public boolean isMatch(HttpRequest request) {
-        return isMethodMatch(request.method) && isURLMatch(request.path);
-    }
-    // builder end
-
-    private boolean isURLMatch(String path) {
-        return urlTemplate.equals(path);
+    public static Builder get(String urlTemplate) {
+        return new Builder(Method.GET).url(urlTemplate);
     }
 
-    private boolean isMethodMatch(Method method) {
-        return Arrays.asList(methods).contains(method);
+    public static Builder post(String urlTemplate) {
+        return new Builder(Method.POST).url(urlTemplate);
     }
 
+    public static Builder put(String urlTemplate) {
+        return new Builder(Method.PUT).url(urlTemplate);
+    }
+
+    public static Builder delete(String urlTemplate) {
+        return new Builder(Method.DELETE).url(urlTemplate);
+    }
+
+    //---------------------------------------------------------------------------
     public String getUrlTemplate() {
         return urlTemplate;
     }
@@ -45,15 +45,15 @@ public class URLMatcher {
     }
 
     public static class Builder {
-        private Method[] methods;
+
+        private final Method[] methods;
         private String urlTemplate;
 
-        public Builder methods(Method... methods) {
+        private Builder(Method... methods) {
             this.methods = methods;
-            return this;
         }
 
-        public Builder urlTemplate(String urlTemplate) {
+        public Builder url(String urlTemplate) {
             this.urlTemplate = urlTemplate;
             return this;
         }
@@ -62,4 +62,5 @@ public class URLMatcher {
             return new URLMatcher(methods, urlTemplate);
         }
     }
+
 }
