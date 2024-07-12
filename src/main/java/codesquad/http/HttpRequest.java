@@ -4,6 +4,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 /**
@@ -44,7 +46,7 @@ public class HttpRequest {
                 int contentLength = Integer.parseInt(headers.get("Content-Length"));
                 char[] body = new char[contentLength];
                 br.read(body, 0, contentLength);
-                this.body = new String(body);
+                this.body = URLDecoder.decode(new String(body), StandardCharsets.UTF_8);
                 if (headers.get("Content-Type").equals("application/x-www-form-urlencoded"))
                     initFormData(this.body);
             }

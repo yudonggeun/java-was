@@ -42,7 +42,6 @@ public class ApplicationContext {
     }
 
     private HtmlManager htmlManager;
-    private LoginTable loginHandler;
 
     public HtmlManager getHtmlManager() {
         if (htmlManager == null) {
@@ -51,6 +50,8 @@ public class ApplicationContext {
         }
         return htmlManager;
     }
+
+    private LoginTable loginHandler;
 
     public LoginTable getLoginHandler() {
         if (loginHandler == null) {

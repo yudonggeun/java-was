@@ -19,6 +19,7 @@ class HttpRequestTest {
                 GET / HTTP/1.1
                 Host: localhost:8080
                 Connection: keep-alive
+                Content-Type: text/plain
                 Content-Length: 12
                 Accept: text/html
                 

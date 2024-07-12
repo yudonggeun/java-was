@@ -25,9 +25,7 @@ public class TagHtmlElement implements HtmlElement {
                     Operator op = Operator.of(args[1]);
 
                     boolean isMatch = op.match(a, b);
-                    System.out.println(command + ": view=" + isMatch);
                     if (!isMatch) {
-                        System.out.println(tag + " is removed " + this.getAttribute("woowa-if"));
                         this.tag = null;
                         this.children = List.of();
                         return;
