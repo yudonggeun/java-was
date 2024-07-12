@@ -2,14 +2,14 @@ package codesquad.util.collections;
 
 import java.util.Optional;
 
-public class StringTries {
+public class Tries<T> {
 
-    TriesNode<String> root = new TriesNode<>();
+    TriesNode<T> root = new TriesNode<>();
 
-    void insert(String url, String value) {
+    void insert(String url, T value) {
         if (url == null) return;
 
-        TriesNode<String> node = this.root;
+        TriesNode<T> node = this.root;
 
         String[] components = url.split("/");
 
@@ -19,9 +19,9 @@ public class StringTries {
         node.setValue(value);
     }
 
-    public Optional<String> search(String url) {
+    public Optional<T> search(String url) {
         if (url == null) return Optional.empty();
-        TriesNode<String> node = this.root;
+        TriesNode<T> node = this.root;
 
         String[] components = url.split("/");
 

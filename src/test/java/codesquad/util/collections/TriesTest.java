@@ -8,7 +8,7 @@ class TriesTest {
 
     @Test
     void stringTriesTest1() {
-        StringTries tries = new StringTries();
+        Tries<String> tries = new Tries<>();
 
         tries.insert("/users/test", "one");
         tries.insert("/test", "two");
