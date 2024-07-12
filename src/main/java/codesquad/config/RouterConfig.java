@@ -1,5 +1,6 @@
 package codesquad.config;
 
+import codesquad.context.SessionContextManager;
 import codesquad.handler.HttpHandler;
 import codesquad.handler.StaticResourceHandler;
 import codesquad.handler.TemplateResourceHandler;
@@ -31,11 +32,13 @@ import static codesquad.http.Method.GET;
 public class RouterConfig {
 
     private final Logger logger = LoggerFactory.getLogger(RouterConfig.class);
-    private final HtmlManager htmlManager = new HtmlManager();
-    private final Map<URLMatcher, HttpHandler> handlerMap = new HashMap<>();
     private final Map<Method, Tries<HttpHandler>> methodTries = new HashMap<>();
+    private final HtmlManager htmlManager;
+    private final SessionContextManager sessionContextManager;
 
-    public RouterConfig() {
+    public RouterConfig(HtmlManager htmlManager, SessionContextManager sessionContextManager) {
+        this.htmlManager = htmlManager;
+        this.sessionContextManager = sessionContextManager;
         setRoute(staticResourceHandlerMap());
         setRoute(templateResourceHandlerMap());
     }
@@ -151,7 +154,7 @@ public class RouterConfig {
 
                             String urlTemplate = entryName.replaceFirst(directory, "");
                             URLMatcher urlMatcher = URLMatcher.method(GET).url(urlTemplate).build();
-                            HttpHandler httpHandler = new TemplateResourceHandler(getContentType(urlTemplate), bytes, htmlManager);
+                            HttpHandler httpHandler = new TemplateResourceHandler(getContentType(urlTemplate), bytes, htmlManager, sessionContextManager);
                             templateResourceMap.put(urlMatcher, httpHandler);
                         }
                     }
@@ -195,7 +198,7 @@ public class RouterConfig {
 
                 String urlTemplate = path;
                 URLMatcher urlMatcher = URLMatcher.method(GET).url(urlTemplate).build();
-                HttpHandler httpHandler = new TemplateResourceHandler(getContentType(urlTemplate), bytes, htmlManager);
+                HttpHandler httpHandler = new TemplateResourceHandler(getContentType(urlTemplate), bytes, htmlManager, sessionContextManager);
                 map.put(urlMatcher, httpHandler);
             } catch (IOException e) {
                 logger.error("Error reading from binary file: {}", path);

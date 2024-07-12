@@ -20,12 +20,14 @@ public class TemplateResourceHandler implements HttpHandler {
     private final Logger logger = LoggerFactory.getLogger(TemplateResourceHandler.class);
     private final HtmlManager htmlManager;
     private final ContentType contentType;
+    private final SessionContextManager sessionContextManager;
     private final byte[] file;
 
-    public TemplateResourceHandler(ContentType contentType, byte[] file, HtmlManager htmlManager) {
+    public TemplateResourceHandler(ContentType contentType, byte[] file, HtmlManager htmlManager, SessionContextManager sessionContextManager) {
         this.contentType = contentType;
         this.file = file;
         this.htmlManager = htmlManager;
+        this.sessionContextManager = sessionContextManager;
     }
 
     @Override
@@ -43,7 +45,7 @@ public class TemplateResourceHandler implements HttpHandler {
 
             HtmlRoot root = htmlManager.create(template);
 
-            SessionContext session = SessionContextManager.getSession(request);
+            SessionContext session = sessionContextManager.getSession(request);
 
             Model model = new Model();
             model.setSession(session);
