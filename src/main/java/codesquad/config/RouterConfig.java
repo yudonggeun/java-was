@@ -6,6 +6,7 @@ import codesquad.http.HttpRequest;
 import codesquad.http.Method;
 import codesquad.template.HtmlManager;
 import codesquad.util.collections.Tries;
+import codesquad.util.scan.Solo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,6 +24,7 @@ import static codesquad.http.Method.GET;
 /**
  * http 요청을 매핑 설정입니다.
  */
+@Solo
 public class RouterConfig {
 
     private final Logger logger = LoggerFactory.getLogger(RouterConfig.class);

@@ -1,6 +1,8 @@
 package codesquad;
 
+import codesquad.config.FilterConfig;
 import codesquad.container.MyContainer;
+import codesquad.context.ApplicationContext;
 import codesquad.net.EndPoint;
 import codesquad.net.SocketFactory;
 
@@ -12,9 +14,12 @@ public class Main {
 
     public static void main(String[] args) throws IOException {
         // init
+        ApplicationContext context = new ApplicationContext();
+        context.scan("codesquad");
+
         ServerSocket serverSocket = new ServerSocket(8080);
         ExecutorService executorService = getExecutorService();
-        MyContainer container = new MyContainer();
+        MyContainer container = new MyContainer((FilterConfig) context.getSoloObject(FilterConfig.class));
         SocketFactory socketFactory = new SocketFactory();
 
         EndPoint endPoint = new EndPoint(serverSocket, executorService, socketFactory, container);

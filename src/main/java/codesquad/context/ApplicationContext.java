@@ -1,75 +1,143 @@
 package codesquad.context;
 
-import codesquad.config.FilterConfig;
-import codesquad.config.RouterConfig;
-import codesquad.handler.LoginTable;
-import codesquad.template.HtmlManager;
+import codesquad.util.scan.Solo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Map;
+import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Parameter;
+import java.net.URL;
+import java.util.*;
 
 public class ApplicationContext {
 
-    public static ApplicationContext context = new ApplicationContext();
-    public static Logger logger = LoggerFactory.getLogger(ApplicationContext.class);
-
-    static {
-        context.getRouterConfig();
-        context.getFilterConfig();
-        context.getHtmlManager();
-
-        // router init
-        context.getLoginHandler();
-    }
-
-    private Map<Class<?>, Object> soloObject;
-
-    public void registerSingleTon(Object solo) {
-        soloObject.putIfAbsent(solo.getClass(), solo);
-    }
+    private final Logger logger = LoggerFactory.getLogger(ApplicationContext.class);
+    private final Set<Class<?>> waitingSolos = new HashSet<>();
+    private final Map<Class<?>, Object> soloObject = new HashMap<>();
 
     public Object getSoloObject(Class<?> clazz) {
         return soloObject.get(clazz);
     }
 
-    private FilterConfig filterConfig;
+    /**
+     * basePackageName 아래에 존재하는 컴포넌트를 스캔하여 객체를 생성합니다.
+     *
+     * @param basePackageName
+     */
+    public void scan(String basePackageName) {
+        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+        String path = basePackageName.replace('.', '/');
 
-    public FilterConfig getFilterConfig() {
-        if (filterConfig == null) {
-            logger.info("init filter config");
-            filterConfig = new FilterConfig(this);
+        List<Class<?>> classes = new ArrayList<>();
+
+        try {
+            List<File> files = new ArrayList<>();
+            Enumeration<URL> resources = classLoader.getResources(path);
+            while (resources.hasMoreElements()) {
+                URL resource = resources.nextElement();
+                files.add(new File(resource.getFile()));
+            }
+            for (File file : files) {
+                if (file.isDirectory()) {
+                    classes.addAll(findClasses(file, basePackageName));
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        return filterConfig;
+
+        // init solo
+        for (Class<?> clazz : classes) {
+            Solo annotation = clazz.getAnnotation(Solo.class);
+            if (annotation != null) {
+                initSolos(clazz);
+            }
+        }
+        // make solo object and register
+        for (Class<?> clazz : waitingSolos) {
+            makeSolos(clazz);
+        }
+        waitingSolos.clear();
     }
 
-    private RouterConfig routerConfig;
-
-    public RouterConfig getRouterConfig() {
-        if (routerConfig == null) {
-            logger.info("init router config");
-            routerConfig = new RouterConfig();
+    private List<Class<?>> findClasses(File directory, String packageName) {
+        List<Class<?>> classes = new ArrayList<>();
+        if (!directory.exists()) {
+            return classes;
         }
-        return routerConfig;
+
+        File[] files = directory.listFiles();
+        for (File file : files) {
+            if (file.isDirectory()) {
+                classes.addAll(findClasses(file, packageName + "." + file.getName()));
+            } else if (file.getName().endsWith(".class")) {
+                String className = packageName + '.' + file.getName().substring(0, file.getName().length() - 6);
+                ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+                try {
+                    classes.add(Class.forName(className, false, classLoader));
+                } catch (ClassNotFoundException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        return classes;
     }
 
-    private HtmlManager htmlManager;
-
-    public HtmlManager getHtmlManager() {
-        if (htmlManager == null) {
-            logger.info("init html manager");
-            htmlManager = new HtmlManager();
-        }
-        return htmlManager;
+    /**
+     * 컨텍스트에 등록할 객체의 타입을 초기화합니다. 컨텍스트에 등록한 객체에 한해서 의존성을 주입하기 위한 작업입니다.
+     *
+     * @param clazz 등록할 싱글톤 객체의 타입
+     */
+    private void initSolos(Class<?> clazz) {
+        waitingSolos.add(clazz);
     }
 
-    private LoginTable loginHandler;
-
-    public LoginTable getLoginHandler() {
-        if (loginHandler == null) {
-            logger.info("init login handler");
-            loginHandler = new LoginTable(getRouterConfig(), getHtmlManager());
+    /**
+     * 싱글톤 객체를 생성합니다. 만약 이미 등록된 객체 타입이라면 등록된 객체를 반환합니다.
+     *
+     * @param clazz 싱글톤 객체의 타입
+     * @return 생성된 싱글톤 객체
+     */
+    private Object makeSolos(Class<?> clazz) {
+        if (soloObject.containsKey(clazz)) {
+            return soloObject.get(clazz);
         }
-        return loginHandler;
+        if (waitingSolos.isEmpty() || !waitingSolos.contains(clazz)) {
+            throw new RuntimeException(clazz.getName() + "은 initSolos를 통해서 생성 대기열에 추가가 필요합니다.");
+        }
+        Constructor<?>[] constructors = clazz.getDeclaredConstructors();
+        if (constructors.length != 1) {
+            throw new RuntimeException("싱글톤 객체는 단 하나의 생성자가 존재해야합니다.");
+        }
+        Constructor<?> constructor = constructors[0];
+        Parameter[] args = constructor.getParameters();
+
+        List<Object> parameters = new ArrayList<>();
+        for (Parameter arg : args) {
+            Object object = makeSolos(arg.getType());
+            parameters.add(object);
+        }
+
+        try {
+            Object solo = constructor.newInstance(parameters.toArray());
+            registerSingleTon(solo);
+            return solo;
+        } catch (InvocationTargetException | InstantiationException | IllegalAccessException e) {
+            logger.error(constructor.getName() + " 생성 중 오류가 발생했습니다.");
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * 싱글톤 객체를 등록합니다.
+     *
+     * @param solo 싱글톤 객체
+     */
+    private void registerSingleTon(Object solo) {
+        soloObject.putIfAbsent(solo.getClass(), solo);
     }
 }

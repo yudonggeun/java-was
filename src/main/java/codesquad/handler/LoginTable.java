@@ -10,6 +10,7 @@ import codesquad.template.HtmlElement;
 import codesquad.template.HtmlManager;
 import codesquad.template.HtmlRoot;
 import codesquad.template.Model;
+import codesquad.util.scan.Solo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,6 +22,7 @@ import static codesquad.handler.HandlerBuilder.get;
 import static codesquad.handler.HandlerBuilder.post;
 import static codesquad.http.Method.POST;
 
+@Solo
 public class LoginTable extends RouteTable {
 
     private final Logger logger = LoggerFactory.getLogger(LoginTable.class);

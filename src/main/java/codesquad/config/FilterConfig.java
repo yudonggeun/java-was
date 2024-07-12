@@ -1,7 +1,7 @@
 package codesquad.config;
 
-import codesquad.context.ApplicationContext;
 import codesquad.filter.*;
+import codesquad.util.scan.Solo;
 
 import java.util.Arrays;
 
@@ -20,21 +20,22 @@ import java.util.Arrays;
  * @see FilterChain
  * @see Filter
  */
+@Solo
 public class FilterConfig {
 
-    private final ApplicationContext context;
+    private final RouterConfig routerConfig;
     private final Filter[] filters;
     private final Filter handlerFilter;
 
-    public FilterConfig(ApplicationContext context) {
-        this.context = context;
+    public FilterConfig(RouterConfig routerConfig) {
+        this.routerConfig = routerConfig;
         this.filters = initFilters();
         this.handlerFilter = initHandlerFilter();
         Arrays.sort(this.filters);
     }
 
     private Filter initHandlerFilter() {
-        return new Router(context.getRouterConfig());
+        return new Router(routerConfig);
     }
 
     private Filter[] initFilters() {

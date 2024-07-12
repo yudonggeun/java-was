@@ -1,8 +1,11 @@
 package codesquad.template;
 
+import codesquad.util.scan.Solo;
+
 import java.util.Deque;
 import java.util.LinkedList;
 
+@Solo
 public class HtmlManager {
 
     public HtmlRoot create(String html) {
