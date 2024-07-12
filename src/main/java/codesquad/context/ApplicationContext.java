@@ -10,7 +10,11 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Parameter;
 import java.net.URL;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
 public class ApplicationContext {
 
@@ -38,7 +42,12 @@ public class ApplicationContext {
             Enumeration<URL> resources = classLoader.getResources(path);
             while (resources.hasMoreElements()) {
                 URL resource = resources.nextElement();
-                files.add(new File(resource.getFile()));
+                if (resource.getProtocol().equals("jar")) {
+                    String jarPath = URLDecoder.decode(resource.getPath().substring(5, resource.getPath().indexOf("!")), StandardCharsets.UTF_8);
+                    scanJar(basePackageName, jarPath, classes);
+                } else {
+                    files.add(new File(resource.getFile()));
+                }
             }
             for (File file : files) {
                 if (file.isDirectory()) {
@@ -61,6 +70,23 @@ public class ApplicationContext {
             makeSolos(clazz);
         }
         waitingSolos.clear();
+    }
+
+    private void scanJar(String basePackageName, String jarPath, List<Class<?>> classes) throws IOException {
+        try (JarFile jar = new JarFile(jarPath)) {
+            Enumeration<JarEntry> entries = jar.entries();
+            while (entries.hasMoreElements()) {
+                JarEntry entry = entries.nextElement();
+                String entryName = entry.getName();
+                if (entryName.startsWith(basePackageName.replace('.', '/')) && entryName.endsWith(".class")) {
+                    String className = entryName.substring(0, entryName.length() - 6).replace('/', '.');
+                    Class<?> clazz = Class.forName(className);
+                    classes.add(clazz);
+                }
+            }
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private List<Class<?>> findClasses(File directory, String packageName) {
