@@ -59,11 +59,12 @@ public class TemplateTable {
                 if (entryName.startsWith(directory + "/") && !entry.isDirectory()) {
                     try (InputStream inputStream = jarFile.getInputStream(entry)) {
                         byte[] bytes = inputStream.readAllBytes();
+                        String html = new String(bytes);
 
                         String urlTemplate = entryName.replaceFirst(directory, "");
                         templateResources.add(RouteTableRow
                                 .get(urlTemplate)
-                                .handle(new TemplateResourceHandler(getContentType(urlTemplate), bytes, htmlManager, sessionContextManager))
+                                .handle(new TemplateResourceHandler(getContentType(urlTemplate), html, htmlManager, sessionContextManager))
                         );
                     }
                 }
@@ -100,10 +101,11 @@ public class TemplateTable {
         String urlTemplate = file.getPath().split(directory)[1];
         try (InputStream inputStream = new FileInputStream(file)) {
             byte[] bytes = inputStream.readAllBytes();
+            String html = new String(bytes);
 
             templateResources.add(RouteTableRow
                     .get(urlTemplate)
-                    .handle(new TemplateResourceHandler(getContentType(urlTemplate), bytes, htmlManager, sessionContextManager))
+                    .handle(new TemplateResourceHandler(getContentType(urlTemplate), html, htmlManager, sessionContextManager))
             );
         } catch (IOException e) {
             logger.error("Error reading from binary file: {}", urlTemplate);
