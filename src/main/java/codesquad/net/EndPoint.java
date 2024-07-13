@@ -10,7 +10,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ServerSocket;
-import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 
 public class EndPoint {
@@ -44,7 +43,7 @@ public class EndPoint {
 
             while (isRunning) {
                 try {
-                    Socket socket = socketFactory.acceptSocket(serverSocket);
+                    SocketWrapper socket = socketFactory.acceptSocket(serverSocket);
                     executorService.submit(new Processor(socket));
                 } catch (IOException ioe) {
                     logger.error("Failed to accept socket", ioe);
@@ -56,9 +55,9 @@ public class EndPoint {
 
     public class Processor implements Runnable {
 
-        private final Socket socket;
+        private final SocketWrapper socket;
 
-        public Processor(Socket socket) {
+        public Processor(SocketWrapper socket) {
             this.socket = socket;
         }
 
