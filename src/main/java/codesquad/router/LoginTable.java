@@ -1,11 +1,14 @@
-package codesquad.handler;
+package codesquad.router;
 
 import codesquad.application.domain.User;
 import codesquad.application.repository.MyRepository;
 import codesquad.config.RouterConfig;
 import codesquad.context.SessionContext;
 import codesquad.context.SessionContextManager;
-import codesquad.http.*;
+import codesquad.http.ContentType;
+import codesquad.http.HttpRequest;
+import codesquad.http.HttpResponse;
+import codesquad.http.HttpStatus;
 import codesquad.template.HtmlElement;
 import codesquad.template.HtmlManager;
 import codesquad.template.HtmlRoot;
@@ -17,11 +20,9 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
-import java.util.Map;
 
-import static codesquad.handler.URLMatcher.get;
-import static codesquad.handler.URLMatcher.post;
-import static codesquad.http.Method.POST;
+import static codesquad.router.RouteTableRow.get;
+import static codesquad.router.RouteTableRow.post;
 
 @Solo
 public class LoginTable {
@@ -30,31 +31,27 @@ public class LoginTable {
     private final HtmlManager htmlManager;
     private final SessionContextManager sessionContextManager;
 
-    private final Map<URLMatcher, HttpHandler> table = Map.of(
+    private final List<RouteTableRow> table = List.of(
 
-            get("/").build(),
-            request -> {
+            get("/").handle(request -> {
                 HttpResponse response = HttpResponse.of(HttpStatus.MOVED_PERMANENTLY);
                 response.addHeader("Location", "/index.html");
                 return response;
-            },
+            }),
 
-            get("/registration").build(),
-            request -> {
+            get("/registration").handle(request -> {
                 HttpResponse response = HttpResponse.of(HttpStatus.MOVED_PERMANENTLY);
                 response.addHeader("Location", "/registration/index.html");
                 return response;
-            },
+            }),
 
-            get("/login").build(),
-            request -> {
+            get("/login").handle(request -> {
                 HttpResponse response = HttpResponse.of(HttpStatus.MOVED_PERMANENTLY);
                 response.addHeader("Location", "/login/index.html");
                 return response;
-            },
+            }),
 
-            get("/logout").build(),
-            request -> {
+            get("/logout").handle(request -> {
                 SessionContext session = sessionContextManager().getSession(request);
                 if (session != null) {
                     sessionContextManager().clearContext(request);
@@ -63,10 +60,9 @@ public class LoginTable {
                 response.addHeader("Location", "/index.html");
                 response.addHeader("Set-Cookie", "SID=; Max-Age=0");
                 return response;
-            },
+            }),
 
-            get("/user/list").build(),
-            request -> {
+            get("/user/list").handle(request -> {
                 try (InputStream input = this.getClass().getResourceAsStream("/templates/user/list.html")) {
 
                     HttpResponse response;
@@ -107,16 +103,12 @@ public class LoginTable {
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
-            },
+            }),
 
             // post
-            post("/user/create").build(),
-            request -> {
+            post("/user/create").handle(request -> {
                 HttpResponse response;
-                if (!(
-                        request.method.equals(POST) &&
-                        request.getHeader("Content-Type").contains("application/x-www-form-urlencoded")
-                )) {
+                if (!request.getHeader("Content-Type").contains("application/x-www-form-urlencoded")) {
                     response = HttpResponse.of(HttpStatus.BAD_REQUEST);
                     return response;
                 }
@@ -134,15 +126,11 @@ public class LoginTable {
 
                 logger.debug("User created: {}", user);
                 return response;
-            },
+            }),
 
-            post("/signin").build(),
-            request -> {
+            post("/signin").handle(request -> {
                 HttpResponse response;
-                if (!(
-                        request.method.equals(Method.POST) &&
-                        request.getHeader("Content-Type").contains("application/x-www-form-urlencoded")
-                )) {
+                if (!request.getHeader("Content-Type").contains("application/x-www-form-urlencoded")) {
                     response = HttpResponse.of(HttpStatus.BAD_REQUEST);
                     return response;
                 }
@@ -166,13 +154,13 @@ public class LoginTable {
                 }
 
                 return response;
-            }
+            })
     );
 
     public LoginTable(RouterConfig config, HtmlManager htmlManager, SessionContextManager sessionContextManager) {
         this.htmlManager = htmlManager;
         this.sessionContextManager = sessionContextManager;
-        config.setRoute(table);
+        config.addRouteTable(table);
     }
 
     private HtmlManager htmlManager() {

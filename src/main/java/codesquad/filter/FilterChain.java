@@ -3,6 +3,7 @@ package codesquad.filter;
 import codesquad.config.FilterConfig;
 import codesquad.http.HttpRequest;
 import codesquad.http.HttpResponse;
+import codesquad.router.Router;
 
 /**
  * 필터 체인은 필터의 실행 순서를 제어하는 책임을 가지고 있습니다.

@@ -3,7 +3,7 @@ package codesquad.config;
 import codesquad.context.ApplicationContext;
 import codesquad.filter.Filter;
 import codesquad.filter.FilterChain;
-import codesquad.filter.Router;
+import codesquad.router.Router;
 import codesquad.util.scan.Solo;
 
 import java.util.Arrays;

@@ -1,20 +1,22 @@
-package codesquad.handler;
+package codesquad.router;
 
 import codesquad.http.Method;
 
-/**
- * http request의 요청과 대응하는지 검사하는 클래스입니다.
- */
-public class URLMatcher {
+public class RouteTableRow {
 
     private final Method[] methods;
     private final String urlTemplate;
+    private final HttpHandler handler;
 
-    private URLMatcher(Method[] methods, String urlTemplate) {
+    private RouteTableRow(Method[] methods, String urlTemplate, HttpHandler handler) {
         this.methods = methods;
         this.urlTemplate = urlTemplate;
+        this.handler = handler;
     }
 
+    /*
+     * Builder method
+     */
     public static Builder method(Method... methods) {
         return new Builder(methods);
     }
@@ -35,7 +37,10 @@ public class URLMatcher {
         return new Builder(Method.DELETE).url(urlTemplate);
     }
 
-    //---------------------------------------------------------------------------
+    /*
+     * Getter methods
+     */
+
     public String getUrlTemplate() {
         return urlTemplate;
     }
@@ -44,6 +49,13 @@ public class URLMatcher {
         return methods;
     }
 
+    public HttpHandler getHandler() {
+        return handler;
+    }
+
+    /*
+     * Builder class
+     */
     public static class Builder {
 
         private final Method[] methods;
@@ -58,8 +70,8 @@ public class URLMatcher {
             return this;
         }
 
-        public URLMatcher build() {
-            return new URLMatcher(methods, urlTemplate);
+        public RouteTableRow handle(HttpHandler handler) {
+            return new RouteTableRow(methods, urlTemplate, handler);
         }
     }
 

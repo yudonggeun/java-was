@@ -1,7 +1,7 @@
-package codesquad.filter;
+package codesquad.router;
 
 import codesquad.config.RouterConfig;
-import codesquad.handler.HttpHandler;
+import codesquad.filter.FilterChain;
 import codesquad.http.HttpRequest;
 import codesquad.http.HttpResponse;
 import codesquad.http.HttpStatus;
