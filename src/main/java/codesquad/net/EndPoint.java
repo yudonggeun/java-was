@@ -143,8 +143,9 @@ public class EndPoint {
 
                 // write response
                 output.write(String.format("%s %d %s\r\n", response.getVersion(), response.getStatus().getCode(), response.getStatus().getStatus()).getBytes());
-                if (!response.getHeaderString().isEmpty()) {
-                    output.write(response.getHeaderString().getBytes());
+                String headerString = response.getHeaderString();
+                if (!headerString.isEmpty()) {
+                    output.write(headerString.getBytes());
                     output.write("\r\n".getBytes());
                 }
                 if (response.getBody() != null) {
@@ -166,6 +167,7 @@ public class EndPoint {
                     throw new RuntimeException(ex);
                 }
                 logger.error("Error reading HTTP request: " + e);
+                e.printStackTrace();
             }
         }
     }
