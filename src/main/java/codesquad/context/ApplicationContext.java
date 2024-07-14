@@ -40,6 +40,14 @@ public class ApplicationContext {
                 }
             }
         }
+        for (Class<?> waitingSolo : waitingSolos) {
+            for (Class<?> anInterface : waitingSolo.getInterfaces()) {
+                if (anInterface.equals(interfaze)) {
+                    objects.add((T) makeSolos(waitingSolo));
+                    break;
+                }
+            }
+        }
         return objects;
     }
 
