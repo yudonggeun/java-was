@@ -155,7 +155,6 @@ public class EndPoint {
                 socket.setStatus(SocketStatus.LONG);
 
                 if (!socket.isTimeout()) {
-                    System.out.println(request.path + ": " + socket.getPort());
                     pushSocket(socket);
                 } else {
                     socket.close();

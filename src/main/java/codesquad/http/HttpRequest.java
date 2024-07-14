@@ -19,7 +19,7 @@ public class HttpRequest {
     public final String path;
     public final String version;
 
-    private final Map<String, String> headers = new HashMap<>();
+    private final Map<String, List<String>> headers = new HashMap<>();
     private final Map<String, List<String>> params = new HashMap<>();
     private final Map<String, Object> bodyParams = new HashMap<>();
 
@@ -38,12 +38,18 @@ public class HttpRequest {
             line = br.readLine();
             while (line != null && !line.isEmpty()) {
                 tokens = line.split(": ");
-                headers.put(tokens[0], tokens[1]);
+                headers.putIfAbsent(tokens[0], new ArrayList<>());
+
+                StringTokenizer st = new StringTokenizer(tokens[1], ",; ");
+                while (st.hasMoreTokens()) {
+                    String value = st.nextToken();
+                    headers.get(tokens[0]).add(value);
+                }
                 line = br.readLine();
             }
 
             if (existBody()) {
-                int contentLength = Integer.parseInt(headers.get("Content-Length"));
+                int contentLength = Integer.parseInt(headers.get("Content-Length").get(0));
                 char[] body = new char[contentLength];
                 br.read(body, 0, contentLength);
                 this.body = URLDecoder.decode(new String(body), StandardCharsets.UTF_8);
@@ -118,6 +124,18 @@ public class HttpRequest {
      * @return header value. if header key is not exist, return null
      */
     public String getHeader(String key) {
+        List<String> content = headers.get(key);
+        if (content == null) return null;
+        return content.get(0);
+    }
+
+    /**
+     * http request 헤더의 모든 값을 조회합니다.
+     *
+     * @param key header name
+     * @return header values. if header key is not exit return null
+     */
+    public List<String> getHeaders(String key) {
         return headers.get(key);
     }
 
