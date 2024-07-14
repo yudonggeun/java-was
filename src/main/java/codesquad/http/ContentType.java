@@ -13,7 +13,9 @@ public enum ContentType {
     IMAGE_PNG("image/png", "image", "png", null),
     IMAGE_ICON("image/x-icon", "image", "x-icon", null),
     IMAGE_JPG("image/jpg", "image", "jpg", null),
-    APPLICATION_JSON("application/json", "application", "json", null);
+    APPLICATION_JSON("application/json", "application", "json", null),
+    MULTIPART_FILE("multipart/form-data", "multipart", "form-data", null),
+    ;
 
     public final String fullType;
     public final String type;

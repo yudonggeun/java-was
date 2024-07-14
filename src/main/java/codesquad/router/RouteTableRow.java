@@ -5,6 +5,7 @@ import codesquad.http.Method;
 import codesquad.router.rule.RouteRule;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class RouteTableRow {
@@ -87,6 +88,11 @@ public class RouteTableRow {
 
         public Builder url(String urlTemplate) {
             this.urlTemplate = urlTemplate;
+            return this;
+        }
+
+        public Builder rules(RouteRule... rules) {
+            Collections.addAll(routeRules, rules);
             return this;
         }
 
