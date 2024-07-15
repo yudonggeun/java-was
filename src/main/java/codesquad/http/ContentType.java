@@ -39,6 +39,18 @@ public enum ContentType {
             case "svg" -> IMAGE_SVG;
             case "jpg" -> IMAGE_JPG;
             case "json" -> APPLICATION_JSON;
+
+            case "text/plain" -> TEXT_PLAIN;
+            case "text/html" -> TEXT_HTML;
+            case "text/css" -> TEXT_CSS;
+            case "text/javascript" -> TEXT_JS;
+            case "image/svg+xml" -> IMAGE_SVG;
+            case "image/png" -> IMAGE_PNG;
+            case "image/x-icon" -> IMAGE_ICON;
+            case "image/jpg" -> IMAGE_JPG;
+            case "application/json" -> APPLICATION_JSON;
+            case "multipart/form-data" -> MULTIPART_FILE;
+
             default -> TEXT_PLAIN;
         };
     }
