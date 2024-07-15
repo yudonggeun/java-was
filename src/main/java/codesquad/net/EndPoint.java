@@ -167,6 +167,7 @@ public class EndPoint {
                     throw new RuntimeException(ex);
                 }
                 logger.error("Error reading HTTP request: " + e);
+                e.printStackTrace();
             }
         }
     }

@@ -47,7 +47,8 @@ public class HttpRequest {
                 char[] body = new char[contentLength];
                 br.read(body, 0, contentLength);
                 this.body = URLDecoder.decode(new String(body), StandardCharsets.UTF_8);
-                if (headers.get("Content-Type").equals("application/x-www-form-urlencoded"))
+                String contentType = headers.get("Content-Type");
+                if (contentType != null && contentType.equals("application/x-www-form-urlencoded"))
                     initFormData(this.body);
             }
         } catch (IOException e) {
