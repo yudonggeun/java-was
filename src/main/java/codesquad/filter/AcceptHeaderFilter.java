@@ -3,13 +3,13 @@ package codesquad.filter;
 import codesquad.http.HttpRequest;
 import codesquad.http.HttpResponse;
 import codesquad.http.HttpStatus;
-import codesquad.util.scan.Solo;
 
 /**
  * Accept 헤더를 검사하여 요청을 처리할 수 있는지를 판단하는 필터입니다.
  * Accept 헤더가 없거나 요청을 처리할 수 없는 경우 406 Not Acceptable 상태코드를 반환합니다.
  */
-@Solo
+//@Solo
+@Deprecated
 public class AcceptHeaderFilter implements Filter {
 
     @Override
