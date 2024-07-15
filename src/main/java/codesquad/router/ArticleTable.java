@@ -1,8 +1,11 @@
 package codesquad.router;
 
 import codesquad.application.domain.Article;
+import codesquad.application.domain.Comment;
 import codesquad.application.repository.ArticleRepository;
+import codesquad.application.repository.CommentRepository;
 import codesquad.application.repository.MockArticleRepository;
+import codesquad.application.repository.MockCommentRepository;
 import codesquad.config.RouterConfig;
 import codesquad.context.SessionContext;
 import codesquad.context.SessionContextManager;
@@ -10,6 +13,7 @@ import codesquad.http.ContentType;
 import codesquad.http.HttpRequest;
 import codesquad.http.HttpResponse;
 import codesquad.http.HttpStatus;
+import codesquad.template.HtmlElement;
 import codesquad.template.HtmlManager;
 import codesquad.template.HtmlRoot;
 import codesquad.template.Model;
@@ -32,6 +36,7 @@ public class ArticleTable {
     private final HtmlManager htmlManager;
     private final SessionContextManager sessionContextManager;
     private final ArticleRepository articleRepository;
+    private final CommentRepository commentRepository;
 
     private final List<RouteTableRow> table = List.of(
             get("/article").handle(request -> {
@@ -65,12 +70,29 @@ public class ArticleTable {
 
                     // find article
                     Article article = articleRepository().findOne();
+                    List<Comment> comments = commentRepository().findByArticleId(article.id(), null);
 
                     Model model = new Model();
                     model.setSession(session);
                     model.addAttribute("article", article);
 
                     root.applyModel(model);
+                    HtmlElement element = root.findById("comment-list");
+
+                    for (Comment comment : comments) {
+                        element.addChild(htmlManager().createElement(String.format("""
+                                <li class="comment__item">
+                                    <div class="comment__item__user">
+                                        <img class="comment__item__user__img"/>
+                                        <p class="comment__item__user__nickname">%s</p>
+                                    </div>
+                                    <p class="comment__item__article">
+                                        %s
+                                    </p>
+                                </li>
+                                """, comment.getUser().getNickname(), comment.getContents()))
+                        );
+                    }
 
                     HttpResponse response = HttpResponse.of(HttpStatus.OK);
                     response.setContentType(ContentType.TEXT_HTML);
@@ -82,10 +104,11 @@ public class ArticleTable {
             })
     );
 
-    public ArticleTable(RouterConfig config, HtmlManager htmlManager, SessionContextManager sessionContextManager, MockArticleRepository articleRepository) {
+    public ArticleTable(RouterConfig config, HtmlManager htmlManager, SessionContextManager sessionContextManager, MockArticleRepository articleRepository, MockCommentRepository commentRepository) {
         this.htmlManager = htmlManager;
         this.sessionContextManager = sessionContextManager;
         this.articleRepository = articleRepository;
+        this.commentRepository = commentRepository;
         config.addRouteTable(table);
     }
 
@@ -101,6 +124,10 @@ public class ArticleTable {
 
     private SessionContextManager sessionContextManager() {
         return sessionContextManager;
+    }
+
+    private CommentRepository commentRepository() {
+        return commentRepository;
     }
 
     private HtmlManager htmlManager() {

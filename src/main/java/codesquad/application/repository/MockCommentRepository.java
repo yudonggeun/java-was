@@ -2,9 +2,11 @@ package codesquad.application.repository;
 
 import codesquad.application.domain.Comment;
 import codesquad.application.domain.User;
+import codesquad.util.scan.Solo;
 
 import java.util.List;
 
+@Solo
 public class MockCommentRepository implements CommentRepository {
 
     @Override
