@@ -34,4 +34,10 @@ public class RouterConfig {
                 .search(request.path)
                 .map(RouteTableRow::getHandler);
     }
+
+    public Optional<HttpHandler> findHandler(Method method, String path) {
+        return methodTries.getOrDefault(method, new Tries<>())
+                .search(path)
+                .map(RouteTableRow::getHandler);
+    }
 }
