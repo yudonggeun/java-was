@@ -77,21 +77,24 @@ public class ArticleTable {
                     model.addAttribute("article", article);
 
                     root.applyModel(model);
+
                     HtmlElement element = root.findById("comment-list");
 
-                    for (Comment comment : comments) {
-                        element.addChild(htmlManager().createElement(String.format("""
-                                <li class="comment__item">
-                                    <div class="comment__item__user">
-                                        <img class="comment__item__user__img"/>
-                                        <p class="comment__item__user__nickname">%s</p>
-                                    </div>
-                                    <p class="comment__item__article">
-                                        %s
-                                    </p>
-                                </li>
-                                """, comment.getUser().getNickname(), comment.getContents()))
-                        );
+                    if (element != null) {
+                        for (Comment comment : comments) {
+                            element.addChild(htmlManager().createElement(String.format("""
+                                    <li class="comment__item">
+                                        <div class="comment__item__user">
+                                            <img class="comment__item__user__img"/>
+                                            <p class="comment__item__user__nickname">%s</p>
+                                        </div>
+                                        <p class="comment__item__article">
+                                            %s
+                                        </p>
+                                    </li>
+                                    """, comment.getUser().getNickname(), comment.getContents()))
+                            );
+                        }
                     }
 
                     HttpResponse response = HttpResponse.of(HttpStatus.OK);
