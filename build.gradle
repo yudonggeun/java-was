@@ -16,6 +16,9 @@ dependencies {
     // logback import
     implementation 'ch.qos.logback:logback-classic:1.4.14'
 
+    // https://mvnrepository.com/artifact/com.h2database/h2
+    implementation 'com.h2database:h2:2.2.224'
+
     testImplementation platform('org.junit:junit-bom:5.10.0')
     testImplementation 'org.junit.jupiter:junit-jupiter'
     // assertj import
