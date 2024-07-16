@@ -10,7 +10,6 @@ import codesquad.config.RouterConfig;
 import codesquad.context.SessionContext;
 import codesquad.context.SessionContextManager;
 import codesquad.http.ContentType;
-import codesquad.http.HttpRequest;
 import codesquad.http.HttpResponse;
 import codesquad.http.HttpStatus;
 import codesquad.router.RouteTableRow;
@@ -39,102 +38,82 @@ public class ArticleTable {
     private final ArticleRepository articleRepository;
     private final CommentRepository commentRepository;
 
-    private final List<RouteTableRow> table = List.of(
-            get("/article").handle(request -> {
-                if (sessionContextManager().getSession(request) == null) {
-                    HttpResponse response = HttpResponse.of(HttpStatus.SEE_OTHER);
-                    response.addHeader("Location", "/login/index.html");
-                    return response;
-                }
-                HttpResponse response = HttpResponse.of(HttpStatus.SEE_OTHER);
-                response.addHeader("Location", "/article/index.html");
-                return response;
-            }),
-
-            post("/article").handle(request -> {
-                if (sessionContextManager().getSession(request) == null) {
-                    HttpResponse response = HttpResponse.of(HttpStatus.SEE_OTHER);
-                    response.addHeader("Location", "/login/index.html");
-                    return response;
-                }
-
-                HttpResponse response = HttpResponse.of(HttpStatus.SEE_OTHER);
-                return response;
-            }),
-
-            get("/index.html").handle(request -> {
-                SessionContext session = sessionContextManager().getSession(request);
-
-                try (InputStream inputStream = ResourceFileManager.getInputStream("templates/index.html")) {
-                    byte[] file = inputStream.readAllBytes();
-                    HtmlRoot root = htmlManager().create(new String(file));
-
-                    // find article
-                    Article article = articleRepository().findOne();
-                    List<Comment> comments = commentRepository().findByArticleId(article.id(), null);
-
-                    Model model = new Model();
-                    model.setSession(session);
-                    model.addAttribute("article", article);
-
-                    root.applyModel(model);
-
-                    HtmlElement element = root.findById("comment-list");
-
-                    if (element != null) {
-                        for (Comment comment : comments) {
-                            element.addChild(htmlManager().createElement(String.format("""
-                                    <li class="comment__item">
-                                        <div class="comment__item__user">
-                                            <img class="comment__item__user__img"/>
-                                            <p class="comment__item__user__nickname">%s</p>
-                                        </div>
-                                        <p class="comment__item__article">
-                                            %s
-                                        </p>
-                                    </li>
-                                    """, comment.getUser().getNickname(), comment.getContents()))
-                            );
-                        }
-                    }
-
-                    HttpResponse response = HttpResponse.of(HttpStatus.OK);
-                    response.setContentType(ContentType.TEXT_HTML);
-                    response.setBody(root.toHtml().getBytes());
-                    return response;
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            })
-    );
-
     public ArticleTable(RouterConfig config, HtmlManager htmlManager, SessionContextManager sessionContextManager, MockArticleRepository articleRepository, MockCommentRepository commentRepository) {
         this.htmlManager = htmlManager;
         this.sessionContextManager = sessionContextManager;
         this.articleRepository = articleRepository;
         this.commentRepository = commentRepository;
-        config.addRouteTable(table);
+        config.addRouteTable(table());
     }
 
-    private String readSingleBodyParam(HttpRequest request, String attr) {
-        Object bodyParam = request.getBodyParam(attr);
-        if (bodyParam instanceof String) return (String) bodyParam;
-        return null;
-    }
+    private List<RouteTableRow> table() {
+        return List.of(
+                get("/article").handle(request -> {
+                    if (sessionContextManager.getSession(request) == null) {
+                        HttpResponse response = HttpResponse.of(HttpStatus.SEE_OTHER);
+                        response.addHeader("Location", "/login/index.html");
+                        return response;
+                    }
+                    HttpResponse response = HttpResponse.of(HttpStatus.SEE_OTHER);
+                    response.addHeader("Location", "/article/index.html");
+                    return response;
+                }),
 
-    private ArticleRepository articleRepository() {
-        return articleRepository;
-    }
+                post("/article").handle(request -> {
+                    if (sessionContextManager.getSession(request) == null) {
+                        HttpResponse response = HttpResponse.of(HttpStatus.SEE_OTHER);
+                        response.addHeader("Location", "/login/index.html");
+                        return response;
+                    }
 
-    private SessionContextManager sessionContextManager() {
-        return sessionContextManager;
-    }
+                    HttpResponse response = HttpResponse.of(HttpStatus.SEE_OTHER);
+                    return response;
+                }),
 
-    private CommentRepository commentRepository() {
-        return commentRepository;
-    }
+                get("/index.html").handle(request -> {
+                    SessionContext session = sessionContextManager.getSession(request);
 
-    private HtmlManager htmlManager() {
-        return htmlManager;
+                    try (InputStream inputStream = ResourceFileManager.getInputStream("templates/index.html")) {
+                        byte[] file = inputStream.readAllBytes();
+                        HtmlRoot root = htmlManager.create(new String(file));
+
+                        // find article
+                        Article article = articleRepository.findOne();
+                        List<Comment> comments = commentRepository.findByArticleId(article.id(), null);
+
+                        Model model = new Model();
+                        model.setSession(session);
+                        model.addAttribute("article", article);
+
+                        root.applyModel(model);
+
+                        HtmlElement element = root.findById("comment-list");
+
+                        if (element != null) {
+                            for (Comment comment : comments) {
+                                element.addChild(htmlManager.createElement(String.format("""
+                                        <li class="comment__item">
+                                            <div class="comment__item__user">
+                                                <img class="comment__item__user__img"/>
+                                                <p class="comment__item__user__nickname">%s</p>
+                                            </div>
+                                            <p class="comment__item__article">
+                                                %s
+                                            </p>
+                                        </li>
+                                        """, comment.getUser().getNickname(), comment.getContents()))
+                                );
+                            }
+                        }
+
+                        HttpResponse response = HttpResponse.of(HttpStatus.OK);
+                        response.setContentType(ContentType.TEXT_HTML);
+                        response.setBody(root.toHtml().getBytes());
+                        return response;
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                })
+        );
     }
 }
