@@ -7,6 +7,7 @@ public class HttpResponse {
 
     private final String version = "HTTP/1.1";
     private HttpStatus status;
+    private ContentType contentType;
     private Map<String, String> headers = new HashMap<>();
     private byte[] body;
 
@@ -36,6 +37,13 @@ public class HttpResponse {
         for (Map.Entry<String, String> entry : headers.entrySet()) {
             sb.append(entry.getKey()).append(": ").append(entry.getValue()).append("\r\n");
         }
+        if (contentType != null) {
+            sb.append("Content-type: ").append(contentType.fullType);
+            if (contentType.charset != null) {
+                sb.append("; ").append("charset=").append(contentType.charset);
+            }
+            sb.append("\r\n");
+        }
         return sb.toString();
     }
 
@@ -55,7 +63,7 @@ public class HttpResponse {
     }
 
     public void setContentType(ContentType type) {
-        headers.put("Content-Type", type.fullType);
+        this.contentType = type;
     }
 
     public void addHeader(String key, String value) {
@@ -74,6 +82,7 @@ public class HttpResponse {
         }
         this.clear();
         this.status = response.getStatus();
+        this.contentType = response.contentType;
         this.headers = response.headers;
         this.body = response.getBody();
     }

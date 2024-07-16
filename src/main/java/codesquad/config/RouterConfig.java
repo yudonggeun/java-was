@@ -32,6 +32,7 @@ public class RouterConfig {
     public Optional<HttpHandler> findHandler(HttpRequest request) {
         return methodTries.getOrDefault(request.method, new Tries<>())
                 .search(request.path)
+                .filter(routeTableRow -> routeTableRow.isMatch(request))
                 .map(RouteTableRow::getHandler);
     }
 

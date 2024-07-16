@@ -1,18 +1,25 @@
 package codesquad.router;
 
+import codesquad.http.HttpRequest;
 import codesquad.http.Method;
-import codesquad.router.handler.HttpHandler;
+import codesquad.router.rule.RouteRule;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class RouteTableRow {
 
     private final Method[] methods;
     private final String urlTemplate;
     private final HttpHandler handler;
+    private final List<RouteRule> routeRules;
 
-    private RouteTableRow(Method[] methods, String urlTemplate, HttpHandler handler) {
+    private RouteTableRow(Method[] methods, String urlTemplate, HttpHandler handler, List<RouteRule> routeRules) {
         this.methods = methods;
         this.urlTemplate = urlTemplate;
         this.handler = handler;
+        this.routeRules = routeRules;
     }
 
     /*
@@ -55,12 +62,25 @@ public class RouteTableRow {
     }
 
     /*
+     * logic method
+     */
+    public boolean isMatch(HttpRequest request) {
+        for (RouteRule rule : routeRules) {
+            if (!rule.isSatisfied(request)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /*
      * Builder class
      */
     public static class Builder {
 
         private final Method[] methods;
         private String urlTemplate;
+        private final List<RouteRule> routeRules = new ArrayList<>();
 
         private Builder(Method... methods) {
             this.methods = methods;
@@ -71,8 +91,13 @@ public class RouteTableRow {
             return this;
         }
 
+        public Builder rules(RouteRule... rules) {
+            Collections.addAll(routeRules, rules);
+            return this;
+        }
+
         public RouteTableRow handle(HttpHandler handler) {
-            return new RouteTableRow(methods, urlTemplate, handler);
+            return new RouteTableRow(methods, urlTemplate, handler, routeRules);
         }
     }
 

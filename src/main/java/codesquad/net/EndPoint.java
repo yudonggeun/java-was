@@ -143,8 +143,9 @@ public class EndPoint {
 
                 // write response
                 output.write(String.format("%s %d %s\r\n", response.getVersion(), response.getStatus().getCode(), response.getStatus().getStatus()).getBytes());
-                if (!response.getHeaderString().isEmpty()) {
-                    output.write(response.getHeaderString().getBytes());
+                String headerString = response.getHeaderString();
+                if (!headerString.isEmpty()) {
+                    output.write(headerString.getBytes());
                     output.write("\r\n".getBytes());
                 }
                 if (response.getBody() != null) {
@@ -155,7 +156,6 @@ public class EndPoint {
                 socket.setStatus(SocketStatus.LONG);
 
                 if (!socket.isTimeout()) {
-                    System.out.println(request.path + ": " + socket.getPort());
                     pushSocket(socket);
                 } else {
                     socket.close();
