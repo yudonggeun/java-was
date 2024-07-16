@@ -5,8 +5,8 @@ import codesquad.application.domain.Comment;
 import codesquad.application.domain.User;
 import codesquad.application.repository.ArticleRepository;
 import codesquad.application.repository.CommentRepository;
-import codesquad.application.repository.MockArticleRepository;
-import codesquad.application.repository.MockCommentRepository;
+import codesquad.application.repository.H2ArticleRepository;
+import codesquad.application.repository.H2CommentRepository;
 import codesquad.config.RouterConfig;
 import codesquad.context.SessionContext;
 import codesquad.context.SessionContextManager;
@@ -40,7 +40,7 @@ public class ArticleTable {
     private final ArticleRepository articleRepository;
     private final CommentRepository commentRepository;
 
-    public ArticleTable(RouterConfig config, HtmlManager htmlManager, SessionContextManager sessionContextManager, MockArticleRepository articleRepository, MockCommentRepository commentRepository) {
+    public ArticleTable(RouterConfig config, HtmlManager htmlManager, SessionContextManager sessionContextManager, H2ArticleRepository articleRepository, H2CommentRepository commentRepository) {
         this.htmlManager = htmlManager;
         this.sessionContextManager = sessionContextManager;
         this.articleRepository = articleRepository;
@@ -94,7 +94,7 @@ public class ArticleTable {
                                                 %s
                                             </p>
                                         </li>
-                                        """, comment.getUser().getNickname(), comment.getContents()))
+                                        """, comment.getNickname(), comment.getContents()))
                                 );
                             }
                         }
@@ -137,7 +137,29 @@ public class ArticleTable {
 
                         // find article
                         Article article = articleRepository.findOne();
-                        List<Comment> comments = commentRepository.findByArticleId(article.id(), null);
+
+                        if (article != null) {
+                            List<Comment> comments = commentRepository.findByArticleId(article.id(), null);
+
+                            HtmlElement element = root.findById("comment-list");
+
+                            if (element != null) {
+                                for (Comment comment : comments) {
+                                    element.addChild(htmlManager.createElement(String.format("""
+                                            <li class="comment__item">
+                                                <div class="comment__item__user">
+                                                    <img class="comment__item__user__img"/>
+                                                    <p class="comment__item__user__nickname">%s</p>
+                                                </div>
+                                                <p class="comment__item__article">
+                                                    %s
+                                                </p>
+                                            </li>
+                                            """, comment.getNickname(), comment.getContents()))
+                                    );
+                                }
+                            }
+                        }
 
                         Model model = new Model();
                         model.setSession(session);
@@ -145,24 +167,6 @@ public class ArticleTable {
 
                         root.applyModel(model);
 
-                        HtmlElement element = root.findById("comment-list");
-
-                        if (element != null) {
-                            for (Comment comment : comments) {
-                                element.addChild(htmlManager.createElement(String.format("""
-                                        <li class="comment__item">
-                                            <div class="comment__item__user">
-                                                <img class="comment__item__user__img"/>
-                                                <p class="comment__item__user__nickname">%s</p>
-                                            </div>
-                                            <p class="comment__item__article">
-                                                %s
-                                            </p>
-                                        </li>
-                                        """, comment.getUser().getNickname(), comment.getContents()))
-                                );
-                            }
-                        }
 
                         HttpResponse response = HttpResponse.of(HttpStatus.OK);
                         response.setContentType(ContentType.TEXT_HTML);
@@ -213,7 +217,7 @@ public class ArticleTable {
 
                             String contents = (String) request.getBodyParam("content");
 
-                            Comment comment = new Comment(user, articleId, contents);
+                    Comment comment = new Comment(null, user.getUserId(), user.getNickname(), articleId, contents);
 
                             commentRepository.save(comment);
 

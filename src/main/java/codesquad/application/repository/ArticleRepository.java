@@ -8,7 +8,7 @@ public interface ArticleRepository {
 
     Article findOne();
 
-    void save(Article article);
+    Article save(Article article);
 
     void deleteById(String id);
 }

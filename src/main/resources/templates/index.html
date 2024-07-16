@@ -42,7 +42,7 @@
             </li>
         </ul>
     </header>
-    <div class="wrapper" woowa-if="session.user != null">
+    <div class="wrapper" woowa-if="article != null">
         <div class="post">
             <div class="post__account">
                 <img class="post__account__img"/>
@@ -66,7 +66,7 @@
                     <img src="/img/bookMark.svg"/>
                 </button>
             </div>
-            <p class="post__article" id="articleId" woowa-value="article.id">
+            <p class="post__article hidden" id="articleId" woowa-value="article.id">
                 title
             </p>
             <p class="post__article" woowa-value="article.title">
