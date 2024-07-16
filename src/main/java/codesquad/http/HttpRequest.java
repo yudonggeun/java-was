@@ -176,6 +176,10 @@ public class HttpRequest {
         return new String(body);
     }
 
+    public byte[] getByteBody() {
+        return body;
+    }
+
     public String getHeaders() {
         return headers.toString();
     }

@@ -14,15 +14,15 @@ class MultipartContentTest {
                 "----\r\n" +
                 "Content-Disposition: form-data; name=\"file\"; filename=\"test.txt\"\r\n" +
                 "\r\n" +
-                "hello world" +
+                "hello world\r\n" +
                 "----\r\n" +
                 "Content-Disposition: form-data; name=\"hello\"; filename=\"hello.txt\"\r\n" +
                 "test: test\r\n" +
                 "hello: hello world\r\n" +
                 "Content-Type: application/json\r\n" +
                 "\r\n" +
-                "hello world" +
-                "----\r\n";
+                "hello world\r\n" +
+                "----\r\n--";
 
         List<MultipartContent> parse = MultipartContent.parse("--", input.getBytes());
         for (MultipartContent multipartRequest : parse) {
@@ -33,7 +33,7 @@ class MultipartContentTest {
             assertThat(multipartRequest.filename).isEqualTo("test.txt");
             assertThat(multipartRequest.name).isEqualTo("file");
             assertThat(multipartRequest.contentType).isEqualTo(ContentType.TEXT_PLAIN);
-            assertThat(multipartRequest.type).isEqualTo("hello world".getBytes());
+            assertThat(multipartRequest.content).isEqualTo("hello world".getBytes());
             assertThat(multipartRequest.headers).isEmpty();
             return true;
         });
@@ -42,7 +42,7 @@ class MultipartContentTest {
             assertThat(multipartRequest.filename).isEqualTo("hello.txt");
             assertThat(multipartRequest.name).isEqualTo("hello");
             assertThat(multipartRequest.contentType).isEqualTo(ContentType.APPLICATION_JSON);
-            assertThat(multipartRequest.type).isEqualTo("hello world".getBytes());
+            assertThat(multipartRequest.content).isEqualTo("hello world".getBytes());
             assertThat(multipartRequest.headers.get("hello")).isEqualTo("hello world");
             assertThat(multipartRequest.headers.get("test")).isEqualTo("test");
             return true;

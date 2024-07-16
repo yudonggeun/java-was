@@ -4,31 +4,28 @@ import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class MultipartContent {
 
     public final String name;
     public final String filename;
     public final ContentType contentType;
-    public final byte[] type;
+    public final byte[] content;
     public final Map<String, String> headers;
 
     public MultipartContent(String filename, String name, ContentType contentType, byte[] type, Map<String, String> headers) {
         this.filename = filename;
         this.name = name;
         this.contentType = contentType;
-        this.type = type;
+        this.content = type;
         this.headers = headers;
     }
 
     public static List<MultipartContent> parse(String boundary, byte[] body) {
 
         List<MultipartContent> multipartRequests = new ArrayList<>();
-        boundary = "--" + boundary + "\r\n";
+        boundary = "--" + boundary;
 
         byte[][] multipartDatas = splitByte(body, boundary.getBytes());
 
@@ -42,8 +39,11 @@ public class MultipartContent {
 
             byte[][] splitMultipart = splitByte(multipartData, "\r\n\r\n".getBytes());
 
+            if (splitMultipart.length == 0) {
+                break;
+            }
             byte[][] headers = splitByte(splitMultipart[0], "\r\n".getBytes());
-            byte[] contentBody = splitMultipart[1];
+            byte[] contentBody = Arrays.copyOf(splitMultipart[1], splitMultipart[1].length - boundary.length() - 2);
 
             int index = 0;
             // header
@@ -109,7 +109,7 @@ public class MultipartContent {
                 if (content.size() == boundary.length) {
                     content.clear();
                 } else {
-                    List<Byte> listContent = content.subList(0, content.size() - boundary.length);
+                    List<Byte> listContent = content;
                     byte[] bytes = toByteArray(listContent);
                     result.add(bytes);
                     content.clear();
@@ -123,6 +123,10 @@ public class MultipartContent {
         return result.toArray(new byte[0][]);
     }
 
+    public byte[] getContent() {
+        return content;
+    }
+
     private static byte[] toByteArray(List<Byte> bytes) {
         byte[] result = new byte[bytes.size()];
         for (int i = 0; i < bytes.size(); i++) {
@@ -132,6 +136,6 @@ public class MultipartContent {
     }
 
     public String toString() {
-        return "name: " + name + ", filename: " + filename + ", contentType: " + contentType + ", type: " + new String(type) + ", headers: " + headers;
+        return "name: " + name + ", filename: " + filename + ", contentType: " + contentType + ", type: " + new String(content) + ", headers: " + headers;
     }
 }
