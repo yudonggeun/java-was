@@ -1,6 +1,7 @@
 package codesquad.util.collections;
 
 import java.util.Optional;
+import java.util.regex.Pattern;
 
 public class Tries<T> {
 
@@ -13,7 +14,11 @@ public class Tries<T> {
 
         String[] components = url.split("/");
 
+        Pattern pattern = Pattern.compile("\\{[^}]*\\}");
         for (String component : components) {
+            if (pattern.matcher(component).matches()) {
+                component = "*";
+            }
             node = node.getChildren().computeIfAbsent(component, key -> new TriesNode<>());
         }
         node.setValue(value);
@@ -26,10 +31,14 @@ public class Tries<T> {
         String[] components = url.split("/");
 
         for (String component : components) {
-            node = node.getChildren().getOrDefault(component, null);
-            if (node == null) {
-                return Optional.empty();
+            TriesNode<T> nextNode = node.getChildren().getOrDefault(component, null);
+            if (nextNode == null) {
+                nextNode = node.getChildren().getOrDefault("*", null);
+                if (nextNode == null) {
+                    return Optional.empty();
+                }
             }
+            node = nextNode;
         }
 
         if (node.getValue() == null) {

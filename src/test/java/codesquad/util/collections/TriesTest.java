@@ -19,5 +19,17 @@ class TriesTest {
         assertThat(tries.search("/test/users")).isEmpty();
     }
 
+    @Test
+    void pathVariable() {
 
+        Tries<String> tries = new Tries<>();
+
+        tries.insert("/users/test/test", "test");
+        tries.insert("/users/{path}/test", "one");
+
+        assertThat(tries.search("/users/hello/test")).get().isEqualTo("one");
+        assertThat(tries.search("/users/test/test")).get().isEqualTo("test");
+        assertThat(tries.search("/users/hello")).isEmpty();
+
+    }
 }
