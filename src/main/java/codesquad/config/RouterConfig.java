@@ -2,8 +2,8 @@ package codesquad.config;
 
 import codesquad.http.HttpRequest;
 import codesquad.http.Method;
-import codesquad.router.HttpHandler;
 import codesquad.router.RouteTableRow;
+import codesquad.router.handler.HttpHandler;
 import codesquad.util.collections.Tries;
 import codesquad.util.scan.Solo;
 

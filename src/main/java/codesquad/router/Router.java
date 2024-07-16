@@ -6,6 +6,7 @@ import codesquad.http.HttpRequest;
 import codesquad.http.HttpResponse;
 import codesquad.http.HttpStatus;
 import codesquad.http.Method;
+import codesquad.router.handler.HttpHandler;
 import codesquad.util.scan.Solo;
 
 import java.util.Optional;

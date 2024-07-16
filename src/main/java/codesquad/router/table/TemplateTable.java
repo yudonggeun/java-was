@@ -1,8 +1,10 @@
-package codesquad.router;
+package codesquad.router.table;
 
 import codesquad.config.RouterConfig;
 import codesquad.context.SessionContextManager;
 import codesquad.http.ContentType;
+import codesquad.router.RouteTableRow;
+import codesquad.router.handler.TemplateResourceHandler;
 import codesquad.template.HtmlManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

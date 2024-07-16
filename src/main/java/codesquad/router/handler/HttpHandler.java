@@ -1,4 +1,4 @@
-package codesquad.router;
+package codesquad.router.handler;
 
 import codesquad.http.HttpRequest;
 import codesquad.http.HttpResponse;

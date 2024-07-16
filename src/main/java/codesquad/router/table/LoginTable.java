@@ -1,4 +1,4 @@
-package codesquad.router;
+package codesquad.router.table;
 
 import codesquad.application.domain.User;
 import codesquad.application.repository.MyRepository;
@@ -9,6 +9,7 @@ import codesquad.http.ContentType;
 import codesquad.http.HttpRequest;
 import codesquad.http.HttpResponse;
 import codesquad.http.HttpStatus;
+import codesquad.router.RouteTableRow;
 import codesquad.template.HtmlElement;
 import codesquad.template.HtmlManager;
 import codesquad.template.HtmlRoot;

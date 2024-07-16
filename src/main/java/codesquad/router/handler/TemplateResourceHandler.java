@@ -1,4 +1,4 @@
-package codesquad.router;
+package codesquad.router.handler;
 
 import codesquad.context.SessionContext;
 import codesquad.context.SessionContextManager;

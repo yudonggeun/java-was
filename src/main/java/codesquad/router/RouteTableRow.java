@@ -1,6 +1,7 @@
 package codesquad.router;
 
 import codesquad.http.Method;
+import codesquad.router.handler.HttpHandler;
 
 public class RouteTableRow {
 

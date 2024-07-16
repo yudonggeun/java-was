@@ -1,7 +1,9 @@
-package codesquad.router;
+package codesquad.router.table;
 
 import codesquad.config.RouterConfig;
 import codesquad.http.ContentType;
+import codesquad.router.RouteTableRow;
+import codesquad.router.handler.StaticResourceHandler;
 import codesquad.util.scan.Solo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
