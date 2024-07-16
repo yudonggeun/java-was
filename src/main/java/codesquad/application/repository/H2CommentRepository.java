@@ -1,6 +1,7 @@
 package codesquad.application.repository;
 
 import codesquad.application.domain.Comment;
+import codesquad.config.DBConfig;
 import codesquad.util.scan.Solo;
 
 import java.sql.*;
@@ -11,13 +12,11 @@ import java.util.UUID;
 @Solo
 public class H2CommentRepository implements CommentRepository {
 
-    private final String DB_URL = "jdbc:h2:tcp://localhost/~/test";
-    private final String USER = "sa";
-    private final String PASSWORD = "";
-
+    private final DBConfig dbConfig;
     // init
-    public H2CommentRepository() {
-        try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASSWORD);
+    public H2CommentRepository(DBConfig dbConfig) {
+        this.dbConfig = dbConfig;
+        try (Connection conn = DriverManager.getConnection(dbConfig.url, dbConfig.username, dbConfig.password);
              Statement stmt = conn.createStatement()
         ) {
             stmt.execute("CREATE TABLE IF NOT EXISTS COMMENT (" +
@@ -34,7 +33,7 @@ public class H2CommentRepository implements CommentRepository {
 
     @Override
     public List<Comment> findByArticleId(String articleId, Pageable pageable) {
-        try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASSWORD);
+        try (Connection conn = DriverManager.getConnection(dbConfig.url, dbConfig.username, dbConfig.password);
              Statement stmt = conn.createStatement()
         ) {
             List<Comment> result = new ArrayList<>();
@@ -63,7 +62,7 @@ public class H2CommentRepository implements CommentRepository {
 
     @Override
     public Comment save(Comment comment) {
-        try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASSWORD);
+        try (Connection conn = DriverManager.getConnection(dbConfig.url, dbConfig.username, dbConfig.password);
              Statement stmt = conn.createStatement()
         ) {
             String id = UUID.randomUUID().toString();
@@ -78,7 +77,7 @@ public class H2CommentRepository implements CommentRepository {
 
     @Override
     public void deleteById(String commentId) {
-        try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASSWORD);
+        try (Connection conn = DriverManager.getConnection(dbConfig.url, dbConfig.username, dbConfig.password);
              Statement stmt = conn.createStatement()
         ) {
             stmt.execute("DELETE FROM COMMENT WHERE id='" + commentId + "'");

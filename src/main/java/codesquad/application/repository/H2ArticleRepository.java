@@ -1,6 +1,7 @@
 package codesquad.application.repository;
 
 import codesquad.application.domain.Article;
+import codesquad.config.DBConfig;
 import codesquad.util.scan.Solo;
 
 import java.sql.*;
@@ -9,13 +10,12 @@ import java.util.UUID;
 @Solo
 public class H2ArticleRepository implements ArticleRepository {
 
-    private final String DB_URL = "jdbc:h2:tcp://localhost/~/test";
-    private final String USER = "sa";
-    private final String PASSWORD = "";
+    private final DBConfig dbConfig;
 
     // init
-    public H2ArticleRepository() {
-        try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASSWORD);
+    public H2ArticleRepository(DBConfig dbConfig) {
+        this.dbConfig = dbConfig;
+        try (Connection conn = DriverManager.getConnection(dbConfig.url, dbConfig.username, dbConfig.password);
              Statement stmt = conn.createStatement()
         ) {
             stmt.execute("CREATE TABLE IF NOT EXISTS ARTICLE (ID VARCHAR(255), WRITER VARCHAR(255), TITLE VARCHAR(255), CONTENT VARCHAR(255))");
@@ -26,7 +26,7 @@ public class H2ArticleRepository implements ArticleRepository {
 
     @Override
     public Article findById(String id) {
-        try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASSWORD);
+        try (Connection conn = DriverManager.getConnection(dbConfig.url, dbConfig.username, dbConfig.password);
              Statement stmt = conn.createStatement()
         ) {
             ResultSet rs = stmt.executeQuery("SELECT * FROM ARTICLE WHERE id='" + id + "'");
@@ -47,7 +47,7 @@ public class H2ArticleRepository implements ArticleRepository {
 
     @Override
     public Article findOne() {
-        try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASSWORD);
+        try (Connection conn = DriverManager.getConnection(dbConfig.url, dbConfig.username, dbConfig.password);
              Statement stmt = conn.createStatement()
         ) {
             ResultSet rs = stmt.executeQuery("SELECT * FROM ARTICLE LIMIT 1");
@@ -68,7 +68,7 @@ public class H2ArticleRepository implements ArticleRepository {
 
     @Override
     public Article save(Article article) {
-        try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASSWORD);
+        try (Connection conn = DriverManager.getConnection(dbConfig.url, dbConfig.username, dbConfig.password);
              Statement stmt = conn.createStatement()
         ) {
             String id = UUID.randomUUID().toString();
@@ -82,7 +82,7 @@ public class H2ArticleRepository implements ArticleRepository {
 
     @Override
     public void deleteById(String id) {
-        try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASSWORD);
+        try (Connection conn = DriverManager.getConnection(dbConfig.url, dbConfig.username, dbConfig.password);
              Statement stmt = conn.createStatement()
         ) {
             stmt.execute("DELETE FROM ARTICLE WHERE id=" + id);
