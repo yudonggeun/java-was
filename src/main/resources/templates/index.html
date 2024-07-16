@@ -66,6 +66,9 @@
                     <img src="/img/bookMark.svg"/>
                 </button>
             </div>
+            <p class="post__article" id="articleId" woowa-value="article.id">
+                title
+            </p>
             <p class="post__article" woowa-value="article.title">
                 title
             </p>
@@ -90,14 +93,20 @@
                     </a>
                 </li>
                 <li class="nav__menu__item">
-                    <a class="btn btn_ghost btn_size_m" href="/comment/index.html">댓글 작성</a>
+                    <button class="btn btn_ghost btn_size_m" onclick="moveComment()">댓글 작성</button>
+                    <script>
+                        function moveComment() {
+                            let articleId = document.getElementById("articleId").textContent;
+                            window.location.href = `/${articleId}/comment`;
+                        }
+                    </script>
                 </li>
                 <li class="nav__menu__item">
                     <a class="nav__menu__item__btn" href="">
                         다음 글
                         <img
                                 class="nav__menu__item__img"
-                                src="./img/ci_chevron-right.svg"
+                                src="/img/ci_chevron-right.svg"
                         />
                     </a>
                 </li>

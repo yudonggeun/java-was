@@ -164,6 +164,32 @@ public class ArticleTable {
                     }
                 }),
 
+                get("/{articleId}/comment").handle(request -> {
+                    String articleId = request.path.split("/")[1];
+                    try (InputStream inputStream = ResourceFileManager.getInputStream("templates/comment/index.html")) {
+                        byte[] file = inputStream.readAllBytes();
+
+                        Article article = articleRepository.findById(articleId);
+
+                        if (article == null) {
+                            return HttpResponse.of(HttpStatus.NOT_FOUND);
+                        }
+
+                        Model model = new Model();
+                        model.addAttribute("article", article);
+
+                        HtmlRoot root = htmlManager.create(new String(file));
+                        root.applyModel(model);
+
+                        HttpResponse response = HttpResponse.of(HttpStatus.OK);
+                        response.setContentType(ContentType.TEXT_HTML);
+                        response.setBody(root.toHtml().getBytes());
+                        return response;
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                }),
+
                 post("/{articleId}/comment").handle(request -> {
                             SessionContext session = sessionContextManager.getSession(request);
 
