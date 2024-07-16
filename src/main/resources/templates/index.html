@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link href="/reset.css" rel="stylesheet"/>
     <link href="/global.css" rel="stylesheet"/>
     <link href="/main.css" rel="stylesheet"/>
@@ -25,7 +26,7 @@
         </ul>
         <ul class="header__menu" woowa-if="session.user != null">
             <li class="header__menu__item">
-                <a class="btn btn_contained btn_size_s" woowa-value="session.user.nickname">
+                <a class="btn bg-green-400 text-white btn_size_s" woowa-value="session.user.nickname">
                     account
                 </a>
             </li>
@@ -89,7 +90,7 @@
                     </a>
                 </li>
                 <li class="nav__menu__item">
-                    <a class="btn btn_ghost btn_size_m">댓글 작성</a>
+                    <a class="btn btn_ghost btn_size_m" href="/comment/index.html">댓글 작성</a>
                 </li>
                 <li class="nav__menu__item">
                     <a class="nav__menu__item__btn" href="">
