@@ -2,6 +2,7 @@ package codesquad.router;
 
 import codesquad.http.HttpRequest;
 import codesquad.http.Method;
+import codesquad.router.handler.HttpHandler;
 import codesquad.router.rule.RouteRule;
 
 import java.util.ArrayList;

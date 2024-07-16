@@ -3,6 +3,8 @@ package codesquad.context;
 import codesquad.http.HttpRequest;
 import codesquad.util.scan.Solo;
 
+import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -33,20 +35,15 @@ public class SessionContextManager {
     }
 
     private String getSessionId(HttpRequest request) {
-        String sid = null;
-        String cookies = request.getHeader("Cookie");
+        List<String> cookies = request.getHeaders("Cookie");
         if (cookies == null) return null;
-        cookies = cookies.replace(";", "");
-        for (String cookie : cookies.split(" ")) {
-            String[] entry = cookie.split("=");
-            String key = entry[0];
-            String value = entry[1];
-            if (key.equals("SID")) {
-                sid = value;
-                break;
-            }
-        }
-        return sid;
+        Optional<String> optionalSessionCookie = cookies.stream().filter(cookie -> cookie.startsWith("SID")).findAny();
+
+        if (optionalSessionCookie.isEmpty()) return null;
+        String sessionCookie = optionalSessionCookie.get();
+        String[] entry = sessionCookie.split("=");
+        String value = entry[1];
+        return value;
     }
 
 }
