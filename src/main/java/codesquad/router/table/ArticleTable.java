@@ -2,6 +2,7 @@ package codesquad.router.table;
 
 import codesquad.application.domain.Article;
 import codesquad.application.domain.Comment;
+import codesquad.application.domain.User;
 import codesquad.application.repository.ArticleRepository;
 import codesquad.application.repository.CommentRepository;
 import codesquad.application.repository.MockArticleRepository;
@@ -113,7 +114,31 @@ public class ArticleTable {
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
-                })
+                }),
+
+                post("/{articleId}/comment").handle(request -> {
+                            SessionContext session = sessionContextManager.getSession(request);
+
+                            if (session == null) {
+                                HttpResponse response = HttpResponse.of(HttpStatus.SEE_OTHER);
+                                response.addHeader("Location", "/login/index.html");
+                                return response;
+                            }
+
+                            User user = (User) session.getAttribute("user");
+                            String articleId = request.path.split("/")[1];
+
+                            String contents = (String) request.getBodyParam("content");
+
+                            Comment comment = new Comment(user, articleId, contents);
+
+                            commentRepository.save(comment);
+
+                            HttpResponse response = HttpResponse.of(HttpStatus.SEE_OTHER);
+                            response.addHeader("Location", String.format("/article/%s", articleId));
+                            return response;
+                        }
+                )
         );
     }
 }
