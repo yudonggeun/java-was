@@ -1,9 +1,7 @@
 package codesquad.http;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -23,19 +21,18 @@ public class HttpRequest {
     private final Map<String, List<String>> params = new HashMap<>();
     private final Map<String, Object> bodyParams = new HashMap<>();
 
-    private String body;
+    private byte[] body;
 
     public HttpRequest(InputStream inputStream) {
         try {
-            BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
-            String line = br.readLine();
+            String line = new String(readLine(inputStream));
 
             String[] tokens = line.split(" ");
             method = Method.of(tokens[0]);
             path = getAndGetPath(tokens[1]);
             version = tokens[2];
 
-            line = br.readLine();
+            line = new String(readLine(inputStream));
             while (line != null && !line.isEmpty()) {
                 tokens = line.split(": ");
                 headers.putIfAbsent(tokens[0], new ArrayList<>());
@@ -45,21 +42,50 @@ public class HttpRequest {
                     String value = st.nextToken();
                     headers.get(tokens[0]).add(value);
                 }
-                line = br.readLine();
+                line = new String(readLine(inputStream));
             }
 
             if (existBody()) {
                 int contentLength = Integer.parseInt(headers.get("Content-Length").get(0));
-                char[] body = new char[contentLength];
-                br.read(body, 0, contentLength);
-                this.body = URLDecoder.decode(new String(body), StandardCharsets.UTF_8);
+
+                this.body = new byte[contentLength];
+                inputStream.read(this.body, 0, contentLength);
                 String contentType = headers.get("Content-Type").get(0);
                 if (contentType != null && contentType.equals("application/x-www-form-urlencoded"))
-                    initFormData(this.body);
+                    initFormData(URLDecoder.decode(new String(body), StandardCharsets.UTF_8));
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private byte[] readLine(InputStream inputStream) {
+        List<Byte> result = new ArrayList<>();
+        int count = 0;
+        try {
+            int b = 0;
+            while ((b = inputStream.read()) != -1) {
+                byte bytes = (byte) b;
+                result.add(bytes);
+                if (bytes == '\r') {
+                    count = 1;
+                }
+                if (count == 1 && bytes == '\n') {
+                    return toByteArray(result.subList(0, result.size() - 2));
+                }
+            }
+            return toByteArray(result);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private byte[] toByteArray(List<Byte> bytes) {
+        byte[] result = new byte[bytes.size()];
+        for (int i = 0; i < bytes.size(); i++) {
+            result[i] = bytes.get(i);
+        }
+        return result;
     }
 
     /**
@@ -146,7 +172,8 @@ public class HttpRequest {
      * @return body value. if body is not exist, return null
      */
     public String getBody() {
-        return body;
+        if (body == null) return null;
+        return new String(body);
     }
 
     public String getHeaders() {
