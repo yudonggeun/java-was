@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.UUID;
 
 import static codesquad.router.RouteTableRow.get;
 import static codesquad.router.RouteTableRow.post;
@@ -109,13 +110,21 @@ public class ArticleTable {
 
                 // 게시글 작성
                 post("/article").handle(request -> {
-                    if (sessionContextManager.getSession(request) == null) {
+                    SessionContext session = sessionContextManager.getSession(request);
+                    if (session == null) {
                         HttpResponse response = HttpResponse.of(HttpStatus.SEE_OTHER);
                         response.addHeader("Location", "/login/index.html");
                         return response;
                     }
 
+                    User user = (User) session.getAttribute("user");
+                    String title = (String) request.getBodyParam("title");
+                    String content = (String) request.getBodyParam("content");
+
+                    articleRepository.save(new Article(UUID.randomUUID().toString(), user.getNickname(), title, content));
+
                     HttpResponse response = HttpResponse.of(HttpStatus.SEE_OTHER);
+                    response.addHeader("Location", "/index.html");
                     return response;
                 }),
 
