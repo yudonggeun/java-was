@@ -49,6 +49,7 @@ public class ArticleTable {
 
     private List<RouteTableRow> table() {
         return List.of(
+                // 게시글 작성 페이지 조회
                 get("/article").handle(request -> {
                     if (sessionContextManager.getSession(request) == null) {
                         HttpResponse response = HttpResponse.of(HttpStatus.SEE_OTHER);
@@ -60,6 +61,53 @@ public class ArticleTable {
                     return response;
                 }),
 
+                // 게시글 조회
+                get("/article/{articleId}").handle(request -> {
+                    String articleId = request.path.split("/")[2];
+                    SessionContext session = sessionContextManager.getSession(request);
+
+                    try (InputStream inputStream = ResourceFileManager.getInputStream("templates/index.html")) {
+                        byte[] file = inputStream.readAllBytes();
+                        HtmlRoot root = htmlManager.create(new String(file));
+
+                        Article article = articleRepository.findById(articleId);
+                        List<Comment> comments = commentRepository.findByArticleId(articleId, null);
+
+                        Model model = new Model();
+                        model.setSession(session);
+                        model.addAttribute("article", article);
+
+                        root.applyModel(model);
+
+                        HtmlElement element = root.findById("comment-list");
+
+                        if (element != null) {
+                            for (Comment comment : comments) {
+                                element.addChild(htmlManager.createElement(String.format("""
+                                        <li class="comment__item">
+                                            <div class="comment__item__user">
+                                                <img class="comment__item__user__img"/>
+                                                <p class="comment__item__user__nickname">%s</p>
+                                            </div>
+                                            <p class="comment__item__article">
+                                                %s
+                                            </p>
+                                        </li>
+                                        """, comment.getUser().getNickname(), comment.getContents()))
+                                );
+                            }
+                        }
+
+                        HttpResponse response = HttpResponse.of(HttpStatus.OK);
+                        response.setContentType(ContentType.TEXT_HTML);
+                        response.setBody(root.toHtml().getBytes());
+                        return response;
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                }),
+
+                // 게시글 작성
                 post("/article").handle(request -> {
                     if (sessionContextManager.getSession(request) == null) {
                         HttpResponse response = HttpResponse.of(HttpStatus.SEE_OTHER);
