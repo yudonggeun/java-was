@@ -8,7 +8,7 @@ public interface CommentRepository {
 
     List<Comment> findByArticleId(String articleId, Pageable pageable);
 
-    void save(Comment comment);
+    Comment save(Comment comment);
 
     void deleteById(String commentId);
 }
