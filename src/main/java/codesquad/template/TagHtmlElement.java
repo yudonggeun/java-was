@@ -83,6 +83,11 @@ public class TagHtmlElement implements HtmlElement {
         this.children.add(element);
     }
 
+    @Override
+    public void setAttribute(String attr, String value) {
+        attributes.put(attr, value);
+    }
+
     public static class ElementBuilder implements HtmlElementBuilder {
         private String tag;
         private final Map<String, String> attributes = new HashMap<>();

@@ -26,4 +26,6 @@ public interface HtmlElement {
     String getAttribute(String s);
 
     void addChild(HtmlElement element);
+
+    void setAttribute(String attr, String value);
 }

@@ -36,6 +36,11 @@ public class StringHtmlElement implements HtmlElement {
         throw new UnsupportedOperationException();
     }
 
+    @Override
+    public void setAttribute(String attr, String value) {
+        // do nothing
+    }
+
     public static class ElementBuilder implements HtmlElementBuilder {
 
         private String value;

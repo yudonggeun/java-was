@@ -20,13 +20,17 @@ public class RouterConfig {
 
     private final Map<Method, Tries<RouteTableRow>> methodTries = new HashMap<>();
 
-    public void addRouteTable(List<RouteTableRow> table) {
+    public void addRouteTable(RouteTableRow... table) {
         for (RouteTableRow routeInfo : table) {
             for (Method method : routeInfo.getMethods()) {
                 methodTries.putIfAbsent(method, new Tries<>());
                 methodTries.get(method).insert(routeInfo.getUrlTemplate(), routeInfo);
             }
         }
+    }
+
+    public void addRouteTable(List<RouteTableRow> table) {
+        addRouteTable(table.toArray(new RouteTableRow[0]));
     }
 
     public Optional<HttpHandler> findHandler(HttpRequest request) {

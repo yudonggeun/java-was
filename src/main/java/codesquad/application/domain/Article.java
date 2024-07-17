@@ -4,6 +4,7 @@ public record Article(
         String id,
         String writer,
         String title,
-        String content
+        String content,
+        String imagePath
 ) {
 }
