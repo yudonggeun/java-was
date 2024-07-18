@@ -48,8 +48,7 @@ public class HttpRequest {
             if (existBody()) {
                 int contentLength = Integer.parseInt(headers.get("Content-Length").get(0));
 
-                this.body = new byte[contentLength];
-                inputStream.read(this.body, 0, contentLength);
+                this.body = inputStream.readNBytes(contentLength);
                 String contentType = headers.get("Content-Type").get(0);
                 if (contentType != null && contentType.equals("application/x-www-form-urlencoded"))
                     initFormData(URLDecoder.decode(new String(body), StandardCharsets.UTF_8));

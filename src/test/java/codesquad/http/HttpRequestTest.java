@@ -16,13 +16,13 @@ class HttpRequestTest {
     public void readInputStream() {
         // given
         String httpRequestMessage = """
-                GET / HTTP/1.1
-                Host: localhost:8080
-                Connection: keep-alive
-                Content-Type: text/plain
-                Content-Length: 12
-                Accept: text/html
-                
+                GET / HTTP/1.1\r
+                Host: localhost:8080\r
+                Connection: keep-alive\r
+                Content-Type: text/plain\r
+                Content-Length: 12\r
+                Accept: text/html\r
+                \r
                 Hello World!""";
 
         InputStream inputStream = new ByteArrayInputStream(httpRequestMessage.getBytes());
