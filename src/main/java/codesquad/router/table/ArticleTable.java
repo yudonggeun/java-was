@@ -132,6 +132,7 @@ public class ArticleTable {
                             .findAny();
 
                     if (optionalBoundary.isEmpty()) {
+                        logger.info("boundary not found");
                         return HttpResponse.of(HttpStatus.BAD_REQUEST);
                     }
 

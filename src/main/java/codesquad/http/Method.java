@@ -15,6 +15,6 @@ public enum Method {
                 return m;
             }
         }
-        throw new IllegalArgumentException("요청 메소드가 잘못되었습니다.");
+        throw new IllegalArgumentException("요청 메소드가 잘못되었습니다. method=" + method);
     }
 }
