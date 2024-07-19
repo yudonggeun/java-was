@@ -98,6 +98,7 @@ public class EndPoint {
                 SocketWrapper socket = socketQueue.peek();
                 if (socket == null) continue;
                 try {
+                    Thread.sleep(100);
                     if (socket.isClosed()) {
                         pollSocket();
                     } else if (socket.isTimeout()) {
@@ -109,7 +110,7 @@ public class EndPoint {
                     } else {
                         pushSocket(pollSocket());
                     }
-                } catch (IOException e) {
+                } catch (IOException | InterruptedException e) {
                     throw new RuntimeException(e);
                 }
             }
@@ -130,6 +131,7 @@ public class EndPoint {
                 InputStream input = socket.getInputStream();
                 OutputStream output = socket.getOutputStream();
 
+                logger.info("Connected to {} on port {}", socket.getInetAddress(), socket.getPort());
                 // read request
                 HttpRequest request = new HttpRequest(input);
 
